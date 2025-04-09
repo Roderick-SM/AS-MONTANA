@@ -10,7 +10,7 @@ def init_data():
         "No responde": ['Gonza', 'Lauti', 'Bash', 'Paco', 'Sebastian'],
         "Fuera de París": ['Ale', 'Nico', 'Rodri P', 'Gaston', 'Marius'],
         "Lesionado": ['Rodri A'],
-        "No Juega": ['Diego']
+        "Asados": ['Diego']
     }
 
 # Inicialización
@@ -67,11 +67,11 @@ def generate_positions(x, n, top=43, bottom=13):
 
 # Graficar jugadores
 colores = {'Disponible': '#1E90FF', 'No responde': '#FF8C00', 'Fuera de París': '#FFD700', 
-           'No puede': '#808080', 'Lesionado': '#FF6347', 'No Juega': '#000000'}
+           'No puede': '#808080', 'Lesionado': '#FF6347', 'Asados': '#000000'}
 
 # Posiciones específicas según categoría
-x_posiciones = {'Disponible': 20, 'No responde': 63, 'Fuera de París': 73, 'No puede': 83, 'Lesionado': 83, 'No Juega': 93}
-y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (45,30), 'Lesionado': (27,10), 'No Juega': (35,15)}
+x_posiciones = {'Disponible': 20, 'No responde': 63, 'Fuera de París': 73, 'No puede': 83, 'Lesionado': 83, 'Asados': 93}
+y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (45,30), 'Lesionado': (27,10), 'Asados': (35,15)}
 
 for cat, jugadores in st.session_state.jugadores.items():
     top, bottom = y_limites.get(cat, (43, 13))
@@ -94,7 +94,7 @@ ax.text(75, 2, f"TOTAL: {total_no_disponible}", fontsize=14, weight='bold', ha='
 
 # Leyenda en una sola fila
 handles, labels = ax.get_legend_handles_labels()
-orden_personalizado = ['Disponible', 'No responde', 'Fuera de París', 'No puede', 'Lesionado', 'No Juega']
+orden_personalizado = ['Disponible', 'No responde', 'Fuera de París', 'No puede', 'Lesionado', 'Asados']
 orden_labels = [label for label in orden_personalizado if label in labels]
 orden_handles = [handles[labels.index(label)] for label in orden_labels]
 ax.legend(orden_handles, orden_labels, loc='upper center', bbox_to_anchor=(0.5, -0.06), fontsize=12, ncol=6)
