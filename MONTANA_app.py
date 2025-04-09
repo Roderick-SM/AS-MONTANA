@@ -71,16 +71,17 @@ for cat, jugadores in st.session_state.jugadores.items():
         pos = generate_positions(x_posiciones[cat], len(jugadores), top, bottom)
         for p, name in zip(pos, jugadores):
             ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat])
-            ax.text(p[0], p[1]-2, name, ha='center', fontsize=10, weight='bold')
+            ax.text(p[0], p[1]-1.5, name, ha='center', fontsize=10, weight='bold')
     else:
         ax.plot(x_posiciones[cat], 25, 'o', markersize=15, color=colores[cat])
-        ax.text(x_posiciones[cat], 23, jugadores[0], ha='center', fontsize=10, weight='bold')
+        ax.text(x_posiciones[cat], 23.8, jugadores[0], ha='center', fontsize=10, weight='bold')
 
 # Totales
 ax.text(20, 2, f"TOTAL: {len(st.session_state.jugadores['Disponible'])}", fontsize=14, weight='bold', ha='center')
 total_no_disponible = sum(len(st.session_state.jugadores[cat]) for cat in st.session_state.jugadores if cat != 'Disponible')
 ax.text(75, 2, f"TOTAL: {total_no_disponible}", fontsize=14, weight='bold', ha='center')
 
-# Leyenda
+# Leyenda en una sola fila
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.06), fontsize=12, ncol=6)
 ax.axis('off')
 st.pyplot(fig)
