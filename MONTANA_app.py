@@ -36,6 +36,8 @@ with st.sidebar:
         st.session_state.jugadores[nueva_categoria].append(jugador)
 
 # Dibujar cancha y jugadores
+import matplotlib.image as mpimg
+import os
 fig, ax = plt.subplots(figsize=(14, 9))
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 50)
@@ -45,6 +47,12 @@ ax.add_patch(patches.Rectangle((0, 0), 50, 50, color='#7FCB7F'))
 ax.add_patch(patches.Rectangle((50, 0), 50, 50, color='#B1D7A3'))
 ax.plot([50, 50], [0, 50], color="white", linewidth=2)
 ax.add_patch(patches.Circle((50, 25), 7, edgecolor='white', facecolor='none', linewidth=2))
+
+# Insertar logo en el centro del campo
+logo_path = os.path.join(os.path.dirname(__file__), 'Montana FINAL compressed.png')
+if os.path.exists(logo_path):
+    logo_img = mpimg.imread(logo_path)
+    ax.imshow(logo_img, extent=[43, 57, 18, 32], zorder=5)
 
 # Títulos
 ax.text(20, 47, "DISPONIBLES", fontsize=16, weight='bold', color='darkgreen', ha='center')
