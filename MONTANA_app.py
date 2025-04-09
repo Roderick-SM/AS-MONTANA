@@ -63,7 +63,7 @@ colores = {'Disponible': '#1E90FF', 'No responde': '#FF8C00', 'Fuera de París':
 
 # Posiciones específicas según categoría
 x_posiciones = {'Disponible': 20, 'No responde': 63, 'Fuera de París': 73, 'No puede': 83, 'Lesionado': 83, 'No Juega': 93}
-y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (45,30), 'Lesionado': (27,10)}
+y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (48,30), 'Lesionado': (27,10)}
 
 for cat, jugadores in st.session_state.jugadores.items():
     if cat != 'No Juega':
@@ -82,6 +82,10 @@ total_no_disponible = sum(len(st.session_state.jugadores[cat]) for cat in st.ses
 ax.text(75, 2, f"TOTAL: {total_no_disponible}", fontsize=14, weight='bold', ha='center')
 
 # Leyenda en una sola fila
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.06), fontsize=12, ncol=6)
+handles, labels = ax.get_legend_handles_labels()
+orden_personalizado = ['Disponible', 'No responde', 'Fuera de París', 'No puede', 'Lesionado', 'No Juega']
+orden_labels = [label for label in orden_personalizado if label in labels]
+orden_handles = [handles[labels.index(label)] for label in orden_labels]
+ax.legend(orden_handles, orden_labels, loc='upper center', bbox_to_anchor=(0.5, -0.06), fontsize=12, ncol=6), fontsize=12, ncol=6)
 ax.axis('off')
 st.pyplot(fig)
