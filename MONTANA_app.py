@@ -71,7 +71,7 @@ colores = {'Disponible': '#1E90FF', 'No responde': '#FF8C00', 'Fuera de París':
 
 # Posiciones específicas según categoría
 x_posiciones = {'Disponible': 20, 'No responde': 63, 'Fuera de París': 73, 'No puede': 83, 'Lesionado': 83, 'No Juega': 93}
-y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (45,30), 'Lesionado': (27,10), 'No Juega': (40,10)}
+y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (45,30), 'Lesionado': (27,10), 'No Juega': (35,15)}
 
 for cat, jugadores in st.session_state.jugadores.items():
     top, bottom = y_limites.get(cat, (43, 13))
