@@ -70,7 +70,7 @@ for cat, jugadores in st.session_state.jugadores.items():
         top, bottom = y_limites[cat]
         pos = generate_positions(x_posiciones[cat], len(jugadores), top, bottom)
         for p, name in zip(pos, jugadores):
-            ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat], label=f'{cat} ({colores[cat]})' if name == jugadores[0] else "")
+            ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat], label=cat if name == jugadores[0] else "")
             ax.text(p[0], p[1]-2, name, ha='center', fontsize=10, weight='bold')
     else:
         ax.plot(x_posiciones[cat], 25, 'o', markersize=15, color=colores[cat], label=cat)
