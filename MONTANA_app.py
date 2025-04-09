@@ -52,7 +52,7 @@ ax.add_patch(patches.Circle((50, 25), 7, edgecolor='white', facecolor='none', li
 logo_path = os.path.join(os.path.dirname(__file__), 'Montana FINAL compressed.png')
 if os.path.exists(logo_path):
     logo_img = mpimg.imread(logo_path)
-    ax.imshow(logo_img, extent=[43, 57, 18, 32], zorder=5,alpha=0.5)
+    ax.imshow(logo_img, extent=[43, 57, 18, 32], zorder=5,alpha=0.8)
 
 # Títulos
 ax.text(20, 47, "DISPONIBLES", fontsize=16, weight='bold', color='darkgreen', ha='center')
