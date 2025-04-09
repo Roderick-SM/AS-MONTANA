@@ -82,9 +82,9 @@ for cat, jugadores in st.session_state.jugadores.items():
         posiciones = pos1 + pos2
     else:
         posiciones = generate_positions(x_posiciones[cat], len(jugadores), top, bottom)
-
-    for p, name in zip(posiciones, jugadores):
-        ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat])
+    
+    for i, (p, name) in enumerate(zip(posiciones, jugadores)):
+        ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat], label=cat if i == 0 else "")
         ax.text(p[0], p[1]-2, name, ha='center', fontsize=10, weight='bold')
 
 # Totales
