@@ -77,7 +77,7 @@ for cat, jugadores in st.session_state.jugadores.items():
     top, bottom = y_limites.get(cat, (43, 13))
     if cat == 'Disponible' and len(jugadores) > 7:
         mitad = len(jugadores) // 2 + len(jugadores) % 2
-        pos1 = generate_positions(15, mitad, top, bottom)
+        pos1 = generate_positions(10, mitad, top, bottom)
         pos2 = generate_positions(30, len(jugadores) - mitad, top, bottom)
         posiciones = pos1 + pos2
     else:
