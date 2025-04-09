@@ -71,10 +71,10 @@ for cat, jugadores in st.session_state.jugadores.items():
         pos = generate_positions(x_posiciones[cat], len(jugadores), top, bottom)
         for p, name in zip(pos, jugadores):
             ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat])
-            ax.text(p[0], p[1]-1.5, name, ha='center', fontsize=10, weight='bold')
+            ax.text(p[0], p[1]-2, name, ha='center', fontsize=10, weight='bold')
     else:
         ax.plot(x_posiciones[cat], 25, 'o', markersize=15, color=colores[cat])
-        ax.text(x_posiciones[cat], 23.8, jugadores[0], ha='center', fontsize=10, weight='bold')
+        ax.text(x_posiciones[cat], 21, jugadores[0], ha='center', fontsize=10, weight='bold')
 
 # Totales
 ax.text(20, 2, f"TOTAL: {len(st.session_state.jugadores['Disponible'])}", fontsize=14, weight='bold', ha='center')
