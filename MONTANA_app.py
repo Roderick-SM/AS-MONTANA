@@ -52,7 +52,7 @@ ax.add_patch(patches.Circle((50, 25), 7, edgecolor='white', facecolor='none', li
 logo_path = os.path.join(os.path.dirname(__file__), 'Montana FINAL compressed.png')
 if os.path.exists(logo_path):
     logo_img = mpimg.imread(logo_path)
-    ax.imshow(logo_img, extent=[43, 57, 18, 32], zorder=5,alpha=0.8)
+    ax.imshow(logo_img, extent=[43, 57, 18, 32], zorder=5)
 
 # Títulos
 ax.text(20, 47, "DISPONIBLES", fontsize=16, weight='bold', color='darkgreen', ha='center')
@@ -71,18 +71,21 @@ colores = {'Disponible': '#1E90FF', 'No responde': '#FF8C00', 'Fuera de París':
 
 # Posiciones específicas según categoría
 x_posiciones = {'Disponible': 20, 'No responde': 63, 'Fuera de París': 73, 'No puede': 83, 'Lesionado': 83, 'No Juega': 93}
-y_limites = {'Disponible': (45,12), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (47,30), 'Lesionado': (27,10)}
+y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (45,30), 'Lesionado': (27,10), 'No Juega': (30,10)}
 
 for cat, jugadores in st.session_state.jugadores.items():
-    if cat != 'No Juega':
-        top, bottom = y_limites[cat]
-        pos = generate_positions(x_posiciones[cat], len(jugadores), top, bottom)
-        for p, name in zip(pos, jugadores):
-            ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat], label=cat if name == jugadores[0] else "")
-            ax.text(p[0], p[1]-2, name, ha='center', fontsize=10, weight='bold')
+    top, bottom = y_limites.get(cat, (43, 13))
+    if cat == 'Disponible' and len(jugadores) > 7:
+        mitad = len(jugadores) // 2 + len(jugadores) % 2
+        pos1 = generate_positions(15, mitad, top, bottom)
+        pos2 = generate_positions(30, len(jugadores) - mitad, top, bottom)
+        posiciones = pos1 + pos2
     else:
-        ax.plot(x_posiciones[cat], 25, 'o', markersize=15, color=colores[cat], label=cat)
-        ax.text(x_posiciones[cat], 23, jugadores[0], ha='center', fontsize=10, weight='bold')
+        posiciones = generate_positions(x_posiciones[cat], len(jugadores), top, bottom)
+
+    for p, name in zip(posiciones, jugadores):
+        ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat])
+        ax.text(p[0], p[1]-2, name, ha='center', fontsize=10, weight='bold')
 
 # Totales
 ax.text(20, 2, f"TOTAL: {len(st.session_state.jugadores['Disponible'])}", fontsize=14, weight='bold', ha='center')
