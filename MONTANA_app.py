@@ -81,7 +81,9 @@ for cat, jugadores in st.session_state.jugadores.items():
         pos2 = generate_positions(30, len(jugadores) - mitad, top, bottom)
         posiciones = pos1 + pos2
     else:
-        posiciones = generate_positions(x_posiciones[cat], len(jugadores), top, bottom)
+        x = x_posiciones.get(cat, 90)  # fallback en caso de error
+        posiciones = generate_positions(x, len(jugadores), top, bottom)
+
     
     for i, (p, name) in enumerate(zip(posiciones, jugadores)):
         ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat], label=cat if i == 0 else "")
