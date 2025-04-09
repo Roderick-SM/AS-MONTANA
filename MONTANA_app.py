@@ -71,7 +71,7 @@ colores = {'Disponible': '#1E90FF', 'No responde': '#FF8C00', 'Fuera de París':
 
 # Posiciones específicas según categoría
 x_posiciones = {'Disponible': 20, 'No responde': 63, 'Fuera de París': 73, 'No puede': 83, 'Lesionado': 83, 'No Juega': 93}
-y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (48,30), 'Lesionado': (27,10)}
+y_limites = {'Disponible': (50,8), 'No responde': (43,10), 'Fuera de París': (40,15), 'No puede': (50,30), 'Lesionado': (27,10)}
 
 for cat, jugadores in st.session_state.jugadores.items():
     if cat != 'No Juega':
