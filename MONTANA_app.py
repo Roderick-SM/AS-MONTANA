@@ -86,6 +86,6 @@ handles, labels = ax.get_legend_handles_labels()
 orden_personalizado = ['Disponible', 'No responde', 'Fuera de París', 'No puede', 'Lesionado', 'No Juega']
 orden_labels = [label for label in orden_personalizado if label in labels]
 orden_handles = [handles[labels.index(label)] for label in orden_labels]
-ax.legend(orden_handles, orden_labels, loc='upper center', bbox_to_anchor=(0.5, -0.06), fontsize=12, ncol=6), fontsize=12, ncol=6)
+ax.legend(orden_handles, orden_labels, loc='upper center', bbox_to_anchor=(0.5, -0.06), fontsize=12, ncol=6)
 ax.axis('off')
 st.pyplot(fig)
