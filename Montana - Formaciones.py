@@ -71,6 +71,13 @@ if num_mid_izq + num_mid_der + num_mid_def + num_mid_ofen != num_mid:
     st.error("La suma de las subdivisiones de mediocampistas debe ser igual a la cantidad total de mediocampistas.")
     st.stop()
 
+# Agregamos una opción de escala para mejorar la visualización en celular
+scale = st.slider("Escala de visualización", min_value=1.0, max_value=2.0, value=1.0, step=0.1)
+field_width = int(400 * scale)
+field_height = int(600 * scale)
+suplentes_width = int(150 * scale)
+overall_width = field_width + suplentes_width
+
 # ------------------------------------------------
 # 3) Selección de jugadores titulares
 # ------------------------------------------------
@@ -116,19 +123,7 @@ suplentes_mid = st.multiselect("Suplentes - Medio:",
 suplentes_fwd = st.multiselect("Suplentes - Delanteros:", 
     options=[p for p in all_players["F"] if p not in fwd_choices and p != arquero])
 
-used = set(def_central_choices + def_izq_choices + def_der_choices + 
-           mid_izq_choices + mid_der_choices + mid_def_choices + mid_ofen_choices +
-           fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd + [arquero])
-all_outfield = set(all_players["D"] + all_players["M"] + all_players["F"])
-reservas = sorted(list(all_outfield - used))
-
-st.markdown("---")
-# st.subheader("Reservas")
-# if reservas:
-#     for r in reservas:
-#         st.write("- " + r)
-# else:
-#     st.write("Ninguna")
+# Se eliminó la sección de reservas (ya no se imprime)
 
 # ------------------------------------------------
 # 5) Construcción del canvas con cancha y suplentes integrados
@@ -219,16 +214,16 @@ players_html = build_players_html(
 )
 
 # -------------------
-# a) Cancha (lado izquierdo, 400x600) con fondo "stripes" y área penal con menor altura
+# a) Cancha (lado izquierdo, scale aplicado)
 # -------------------
 field_html = f"""
-<div style="position: absolute; left: 0; top: 0; width: 400px; height: 600px;
+<div style="position: absolute; left: 0; top: 0; width: {field_width}px; height: {field_height}px;
             background: repeating-linear-gradient(
                 0deg,
                 #1e7d36 0px,
-                #1e7d36 40px,
-                #24913c 40px,
-                #24913c 80px
+                #1e7d36 {int(40*scale)}px,
+                #24913c {int(40*scale)}px,
+                #24913c {int(80*scale)}px
             );
             border-right: 2px solid #000; box-sizing: border-box;">
     
@@ -236,50 +231,51 @@ field_html = f"""
     <div style="position: absolute; top: 0px; left: 0; width: 100%; height: 2px; background: white;"></div>
     
     <!-- Punto central -->
-    <div style="position: absolute; top: 0px; left: 200px;
+    <div style="position: absolute; top: 0px; left: {field_width//2}px;
                 width: 6px; height: 6px;
                 background: white; border-radius: 50%;
                 transform: translate(-50%, 50%);"></div>
     
     <!-- Semicírculo central inferior -->
     <div style="
-        position: absolute; top: -60px; left: 200px;
-        width: 120px; height: 120px;
-        margin-left: -60px;
+        position: absolute; top: -{int(60*scale)}px; left: {field_width//2}px;
+        width: {int(120*scale)}px; height: {int(120*scale)}px;
+        margin-left: -{int(60*scale)}px;
         border: 2px solid #fff;
         border-radius: 50%;
-        clip-path: inset(60px 0 0 0);
+        clip-path: inset({int(60*scale)}px 0 0 0);
     "></div>
     
     <!-- Línea de gol -->
-    <div style="position: absolute; top: 598px; left: 0; width: 100%; height: 2px; background: white;"></div>
+    <div style="position: absolute; top: {field_height-2}px; left: 0; width: 100%; height: 2px; background: white;"></div>
     
     <!-- Arco -->
-    <div style="position: absolute; left: 160px; top: 598px; width: 80px; height: 8px; border: 2px solid white;"></div>
+    <div style="position: absolute; left: {int(160*scale)}px; top: {field_height-2}px; width: {int(80*scale)}px; height: {int(8*scale)}px; border: 2px solid white;"></div>
     
     <!-- Área penal (más larga, con menor altura) -->
-    <div style="position: absolute; left: 60px; top: 500px; width: 280px; height: 120px; border: 2px solid white;"></div>
+    <div style="position: absolute; left: {int(60*scale)}px; top: {int(500*scale)}px; width: {int(280*scale)}px; height: {int(120*scale)}px; border: 2px solid white;"></div>
     
     <!-- Área chica -->
-    <div style="position: absolute; left: 160px; top: 580px; width: 80px; height: 60px; border: 2px solid white;"></div>
+    <div style="position: absolute; left: {int(160*scale)}px; top: {int(580*scale)}px; width: {int(80*scale)}px; height: {int(60*scale)}px; border: 2px solid white;"></div>
     
     <!-- Semicírculo frente al área -->
-    <div style="position: absolute; top: 500px; left: 200px;
-                width: 120px; height: 120px;
-                margin-left: -60px; margin-top: -60px;
+    <div style="position: absolute; top: {int(500*scale)}px; left: {field_width//2}px;
+                width: {int(120*scale)}px; height: {int(120*scale)}px;
+                margin-left: -{int(60*scale)}px; margin-top: -{int(60*scale)}px;
                 border: 2px solid white;
                 border-radius: 50%;
-                clip-path: inset(0 0 60px 0);"></div>
+                clip-path: inset(0 0 {int(60*scale)}px 0);
+    "></div>
     
     {players_html}
 </div>
 """
 
 # -------------------
-# b) Panel de suplentes (lado derecho, 150x600, con fondo gris)
-# Orden: Delanteros, Medio, Defensa; DT más abajo, y se muestra formación final.
+# b) Panel de suplentes (lado derecho, con escala aplicada y sin reservas)
+# Orden: Delanteros, Medio, Defensa; DT y formación final.
 # -------------------
-suplentes_html = "<div style='position: absolute; right: 0; top: 0; width: 150px; height: 600px; background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
+suplentes_html = f"<div style='position: absolute; right: 0; top: 0; width: {suplentes_width}px; height: {field_height}px; background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
 suplentes_html += "<div style='text-align: center; font-weight: bold; margin-bottom: 20px;'>Suplentes</div>"
 
 if suplentes_fwd:
@@ -302,14 +298,14 @@ suplentes_html += "<div style='margin-top: 20px; text-align: center; font-size: 
 suplentes_html += "</div>"
 
 # -------------------
-# c) Contenedor global (ancho total: 400+150 = 550px)
+# c) Contenedor global (ancho total: field_width + suplentes_width, height: field_height)
 # -------------------
 overall_html = f"""
-<div style="position: relative; width: 550px; height: 600px; border: 2px solid #000; margin-bottom: 20px;">
+<div style="position: relative; width: {overall_width}px; height: {field_height}px; border: 2px solid #000; margin-bottom: 20px;">
     {field_html}
     {suplentes_html}
 </div>
 """
 
 st.subheader("AS MONTANA - Squad")
-components.html(overall_html, height=620)
+components.html(overall_html, height=field_height+20)
