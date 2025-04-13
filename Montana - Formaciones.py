@@ -9,7 +9,7 @@ st.write("### Versión Final - Opción 3: Colores por Rol y Subdivisión de Medi
 # ------------------------------------------------
 all_players = {
     "A": ["Axel", "Alex", "Gonza"],  # Arqueros
-    "D": ["David", "Manu", "Joaco", "Sebastian", "Ale", "Gaston", "Marius", "Rodri A"],  # Defensores
+    "D": ["David", "Manu", "Joaco", "Sebastian", "Ale", "Gaston", "Marius", "Rodri A", "Alex"],  # Defensores
     "M": ["Pedro", "Juan Colombia", "Alex", "Gonza", "Lauti", "Bash", "Nico", "Rodri P"],  # Mediocampistas
     "F": ["Rodri SM", "Fer", "Parga", "Matheus", "Paco"],  # Delanteros
     "DT": ["Diego"],
