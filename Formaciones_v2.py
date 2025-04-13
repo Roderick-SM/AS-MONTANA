@@ -320,5 +320,3 @@ function downloadImage() {
 
 st.subheader("AS MONTANA - Squad")
 components.html(overall_html, height=field_height+100)
-
-
