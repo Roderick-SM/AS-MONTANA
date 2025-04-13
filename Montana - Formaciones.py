@@ -267,5 +267,5 @@ overall_html = f"""
 </div>
 """
 
-st.subheader("Visualización Completa")
+st.subheader("AS MONTANA - Squad")
 components.html(overall_html, height=620)
