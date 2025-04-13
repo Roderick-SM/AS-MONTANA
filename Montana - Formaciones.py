@@ -1,9 +1,9 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Configuración inicial
+# Configuración
 st.set_page_config(layout="wide")
-st.write("### Versión 3.3 - Círculo central y área corregidos")
+st.write("### Versión 3.4 - Círculo Central Corregido + Suplentes Más Cercanos")
 
 # ---------------------------
 # Datos de jugadores
@@ -77,7 +77,7 @@ fwd_choices = select_players("F", num_fwd, "fwd", "Delanteros", exclude=exclude_
 st.markdown("---")
 st.header("Suplentes y Reservas")
 
-col_dummy, col_suplentes = st.columns([1.7,1])  # Más cerca de la cancha
+col_dummy, col_suplentes = st.columns([1.9,1])
 with col_suplentes:
     st.subheader("Suplentes")
     suplentes_def = st.multiselect("Defensa:", options=[p for p in all_players["D"] if p not in defender_choices and p != arquero])
@@ -99,7 +99,7 @@ with col_suplentes:
 # ---------------------------
 # Visualización de la cancha
 # ---------------------------
-col_field, col_lista = st.columns([3,1.2])
+col_field, col_lista = st.columns([4, 1])
 with col_field:
     st.header("AS MONTANA - SQUAD")
 
@@ -141,7 +141,7 @@ with col_field:
                     transform: translate(-50%, 50%);"></div>
 
         <!-- Semicírculo central inferior -->
-        <div style="position: absolute; left: 200px; top: 0px;
+        <div style="position: absolute; top: 0px; left: 200px;
                     width: 120px; height: 120px;
                     margin-left: -60px;
                     border: 2px solid #fff;
@@ -154,21 +154,19 @@ with col_field:
         <!-- Arco -->
         <div style="position: absolute; left: 160px; top: 598px; width: 80px; height: 8px; border: 2px solid white;"></div>
 
-        <!-- Área penal (más larga horizontalmente) -->
+        <!-- Área penal más larga -->
         <div style="position: absolute; left: 60px; top: 460px; width: 280px; height: 140px; border: 2px solid white;"></div>
 
         <!-- Área chica -->
         <div style="position: absolute; left: 160px; top: 540px; width: 80px; height: 60px; border: 2px solid white;"></div>
 
         <!-- Semicírculo frente al área -->
-        <div style="
-            position: absolute; left: 200px; top: 460px;
-            width: 120px; height: 120px;
-            margin-left: -60px; margin-top: -60px;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            clip-path: inset(0 0 60px 0);
-        "></div>
+        <div style="position: absolute; top: 460px; left: 200px;
+                    width: 120px; height: 120px;
+                    margin-left: -60px; margin-top: -60px;
+                    border: 2px solid white;
+                    border-radius: 50%;
+                    clip-path: inset(0 0 60px 0);"></div>
 
         {html_fwd}
         {html_mid}
