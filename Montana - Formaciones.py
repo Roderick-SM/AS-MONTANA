@@ -140,13 +140,16 @@ with col_field:
                     background: white; border-radius: 50%;
                     transform: translate(-50%, 50%);"></div>
 
-        <!-- Semicírculo central inferior -->
-        <div style="position: absolute; top: 0px; left: 200px;
-                    width: 120px; height: 120px;
-                    margin-left: -60px;
-                    border: 2px solid #fff;
-                    border-radius: 50%;
-                    clip-path: inset(60px 0 0 0);"></div>
+
+        <!-- Semicírculo central inferior (CORREGIDO) -->
+        <div style="
+            position: absolute; top: 0px; left: 200px;
+            width: 120px; height: 120px;
+            margin-left: -60px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            clip-path: inset(60px 0 0 0);  /* muestra solo la mitad inferior */
+        "></div>
 
         <!-- Línea de gol -->
         <div style="position: absolute; top: 598px; left: 0; width: 100%; height: 2px; background: white;"></div>
