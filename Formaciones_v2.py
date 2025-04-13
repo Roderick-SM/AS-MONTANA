@@ -70,7 +70,7 @@ if num_mid_izq + num_mid_der + num_mid_def + num_mid_ofen != num_mid:
     st.error("La suma de las subdivisiones de mediocampistas debe ser igual a la cantidad total de mediocampistas.")
     st.stop()
 
-# Scale is fixed at 1
+# Fijamos la escala a 1
 scale = 1.0
 field_width = int(400 * scale)
 field_height = int(600 * scale)
@@ -110,7 +110,7 @@ mid_ofen_choices = select_players("M", num_mid_ofen, "midofen", "Medio Ofensivo"
 fwd_choices      = select_players("F", num_fwd,     "fwd",    "Delanteros", exclude=exclude_list)
 
 # ------------------------------------------------
-# 4) Suplentes y Reservas (reservas eliminated)
+# 4) Suplentes y Reservas (reservas eliminadas)
 # ------------------------------------------------
 st.markdown("---")
 st.header("Suplentes y Reservas")
@@ -125,7 +125,6 @@ suplentes_fwd = st.multiselect("Suplentes - Delanteros:",
 # ------------------------------------------------
 # 5) Construcción del canvas con cancha y suplentes integrados
 # ------------------------------------------------
-# Function to generate HTML for a player
 def get_player_html(player, top_pct, left_pct, cat):
     if player == "(Ninguno)":
         return ""
@@ -146,7 +145,6 @@ def get_player_html(player, top_pct, left_pct, cat):
     </div>
     """
 
-# Function to build HTML for subdivided defenders
 def build_defenders_html(def_central, def_izq, def_der):
     result = ""
     if def_central:
@@ -166,31 +164,25 @@ def build_defenders_html(def_central, def_izq, def_der):
             result += get_player_html(p, 70, left_pct, "D")
     return result
 
-# Function to build HTML for a subgroup of midfielders
 def build_subgroup_html(players, top_pct, center_x):
     html = ""
     if players:
         n = len(players)
         for i, player in enumerate(players):
-            delta = (i - (n - 1) / 2) * 10  # Horizontal displacement
+            delta = (i - (n - 1) / 2) * 10  
             left_pct = center_x + delta
             html += get_player_html(player, top_pct, left_pct, "M")
     return html
 
-# Function to build the complete HTML for players on the field
 def build_players_html(gk, def_cent, def_izq, def_der, mid_izq, mid_der, mid_def, mid_ofen, fwds):
     result = ""
-    # Goalkeeper ~90% (category "A")
     if gk:
         result += get_player_html(gk[0], 90, field_width//2, "A")
-    # Defenders subdivided:
     result += build_defenders_html(def_cent, def_izq, def_der)
-    # Midfielders subdivided:
     result += build_subgroup_html(mid_izq, 50, 25)
     result += build_subgroup_html(mid_der, 50, 75)
     result += build_subgroup_html(mid_def, 60, 50)
     result += build_subgroup_html(mid_ofen, 40, 50)
-    # Forwards ~25% (category "F")
     if fwds:
         n = len(fwds)
         for i, p in enumerate(fwds):
@@ -210,9 +202,6 @@ players_html = build_players_html(
     fwd_choices
 )
 
-# -------------------
-# a) Field (left side, with fixed scale)
-# -------------------
 field_html = f"""
 <div id="overall_container" style="position: absolute; left: 0; top: 0; width: {field_width}px; height: {field_height}px;
             background: repeating-linear-gradient(
@@ -223,17 +212,11 @@ field_html = f"""
                 #24913c {int(80*scale)}px
             );
             border-right: 2px solid #000; box-sizing: border-box;">
-    
-    <!-- Midline -->
     <div style="position: absolute; top: 0px; left: 0; width: 100%; height: 2px; background: white;"></div>
-    
-    <!-- Center point -->
     <div style="position: absolute; top: 0px; left: {field_width//2}px;
                 width: 6px; height: 6px;
                 background: white; border-radius: 50%;
                 transform: translate(-50%, 50%);"></div>
-    
-    <!-- Bottom semicircle -->
     <div style="
         position: absolute; top: -{int(60*scale)}px; left: {field_width//2}px;
         width: {int(120*scale)}px; height: {int(120*scale)}px;
@@ -242,20 +225,10 @@ field_html = f"""
         border-radius: 50%;
         clip-path: inset({int(60*scale)}px 0 0 0);
     "></div>
-    
-    <!-- Goal line -->
     <div style="position: absolute; top: {field_height-2}px; left: 0; width: 100%; height: 2px; background: white;"></div>
-    
-    <!-- Goal -->
     <div style="position: absolute; left: {int(160*scale)}px; top: {field_height-2}px; width: {int(80*scale)}px; height: {int(8*scale)}px; border: 2px solid white;"></div>
-    
-    <!-- Penalty area -->
     <div style="position: absolute; left: {int(60*scale)}px; top: {int(500*scale)}px; width: {int(280*scale)}px; height: {int(120*scale)}px; border: 2px solid white;"></div>
-    
-    <!-- Small area -->
     <div style="position: absolute; left: {int(160*scale)}px; top: {int(580*scale)}px; width: {int(80*scale)}px; height: {int(60*scale)}px; border: 2px solid white;"></div>
-    
-    <!-- Front semicircle -->
     <div style="position: absolute; top: {int(500*scale)}px; left: {field_width//2}px;
                 width: {int(120*scale)}px; height: {int(120*scale)}px;
                 margin-left: -{int(60*scale)}px; margin-top: -{int(60*scale)}px;
@@ -263,57 +236,46 @@ field_html = f"""
                 border-radius: 50%;
                 clip-path: inset(0 0 {int(60*scale)}px 0);
     "></div>
-    
     {players_html}
 </div>
 """
 
-# -------------------
-# b) Suplentes panel (right side, fixed scale)
-# -------------------
 suplentes_html = f"<div style='position: absolute; right: 0; top: 0; width: {suplentes_width}px; height: {field_height}px; background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
 suplentes_html += "<div style='text-align: center; font-weight: bold; margin-bottom: 20px;'>Suplentes</div>"
-
 if suplentes_fwd:
     suplentes_html += "<div style='margin-bottom: 15px;'><strong>Delanteros:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0 0 5px 0;'>{p}</li>" for p in suplentes_fwd]) + "</ul></div>"
 else:
     suplentes_html += "<div style='margin-bottom: 15px;'><strong>Delanteros:</strong> Ninguno</div>"
-
 if suplentes_mid:
     suplentes_html += "<div style='margin-bottom: 15px;'><strong>Medio:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0 0 5px 0;'>{p}</li>" for p in suplentes_mid]) + "</ul></div>"
 else:
     suplentes_html += "<div style='margin-bottom: 15px;'><strong>Medio:</strong> Ninguno</div>"
-
 if suplentes_def:
     suplentes_html += "<div style='margin-bottom: 15px;'><strong>Defensa:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0 0 5px 0;'>{p}</li>" for p in suplentes_def]) + "</ul></div>"
 else:
     suplentes_html += "<div style='margin-bottom: 15px;'><strong>Defensa:</strong> Ninguno</div>"
-
 suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>DT:</strong> " + all_players['DT'][0] + "</div>"
 suplentes_html += "<div style='margin-top: 20px; text-align: center; font-size: 22px; font-weight: bold;'><strong>Formacion:</strong> <span style='font-size: 22px; font-weight: bold;'>" + formation_str + "</span></div>"
 suplentes_html += "</div>"
 
-# -------------------
-# c) Global container (100% width with max-width)
-# -------------------
-overall_html = r"""
-<div id="overall_container" style="position: relative; width: 100%; max-width: """ + f"{overall_width}px; height: {field_height}px; border: 2px solid #000; margin: auto; margin-bottom: 20px;">" + r"""
-    """ + field_html + r"""
-    """ + suplentes_html + r"""
+overall_html = f"""
+<div id="overall_container" style="position: relative; width: 100%; max-width: {overall_width}px; height: {field_height}px; border: 2px solid #000; margin: auto; margin-bottom: 20px;">
+    {field_html}
+    {suplentes_html}
 </div>
 <div style="text-align: center; margin-bottom: 20px;">
   <button onclick="downloadImage()" style="padding: 10px; font-size: 16px;">Descargar Imagen</button>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-function downloadImage() {
-    html2canvas(document.getElementById("overall_container")).then(function(canvas) {
+function downloadImage() {{
+    html2canvas(document.getElementById("overall_container")).then(function(canvas) {{
         var link = document.createElement('a');
         link.download = 'squad.png';
         link.href = canvas.toDataURL();
         link.click();
-    });
-}
+    }});
+}}
 </script>
 """
 
