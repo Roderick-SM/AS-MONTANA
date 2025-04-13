@@ -71,7 +71,7 @@ if num_mid_izq + num_mid_der + num_mid_def + num_mid_ofen != num_mid:
     st.error("La suma de las subdivisiones de mediocampistas debe ser igual a la cantidad total de mediocampistas.")
     st.stop()
 
-# Agregamos una opción de escala para mejorar la visualización (si bien puede no ajustarse ideal en móvil)
+# Agregamos una opción de escala para mejorar la visualización en celular
 scale = st.slider("Escala de visualización", min_value=1.0, max_value=2.0, value=1.0, step=0.1)
 field_width = int(400 * scale)
 field_height = int(600 * scale)
@@ -122,6 +122,8 @@ suplentes_mid = st.multiselect("Suplentes - Medio:",
     options=[p for p in all_players["M"] if p not in (mid_izq_choices + mid_der_choices + mid_def_choices + mid_ofen_choices) and p != arquero])
 suplentes_fwd = st.multiselect("Suplentes - Delanteros:", 
     options=[p for p in all_players["F"] if p not in fwd_choices and p != arquero])
+
+# Se eliminó la sección de reservas (ya no se imprime)
 
 # ------------------------------------------------
 # 5) Construcción del canvas con cancha y suplentes integrados
@@ -183,7 +185,7 @@ def build_players_html(gk, def_cent, def_izq, def_der, mid_izq, mid_der, mid_def
     result = ""
     # Arquero ~90% (categoria "A")
     if gk:
-        result += get_player_html(gk[0], 90, field_width//2, "A")
+        result += get_player_html(gk[0], 90, 50, "A")
     # Defensores subdivididos:
     result += build_defenders_html(def_cent, def_izq, def_der)
     # Mediocampistas subdivididos:
@@ -215,7 +217,7 @@ players_html = build_players_html(
 # a) Cancha (lado izquierdo, scale aplicado)
 # -------------------
 field_html = f"""
-<div id="overall_container" style="position: absolute; left: 0; top: 0; width: {field_width}px; height: {field_height}px;
+<div style="position: absolute; left: 0; top: 0; width: {field_width}px; height: {field_height}px;
             background: repeating-linear-gradient(
                 0deg,
                 #1e7d36 0px,
@@ -296,31 +298,14 @@ suplentes_html += "<div style='margin-top: 20px; text-align: center; font-size: 
 suplentes_html += "</div>"
 
 # -------------------
-# c) Contenedor global (ancho total: overall_width, height: field_height)
-# Se establece width 100% para que se ajuste a la ventana.
+# c) Contenedor global (ancho total: field_width + suplentes_width, height: field_height)
 # -------------------
 overall_html = f"""
-<div style="position: relative; width: 100%; max-width: {overall_width}px; height: {field_height}px; border: 2px solid #000; margin: auto; margin-bottom: 20px;">
+<div style="position: relative; width: {overall_width}px; height: {field_height}px; border: 2px solid #000; margin-bottom: 20px;">
     {field_html}
     {suplentes_html}
 </div>
-<!-- Botón de descarga -->
-<div style="text-align: center; margin-bottom: 20px;">
-  <button onclick="downloadImage()" style="padding: 10px; font-size: 16px;">Descargar Imagen</button>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
-function downloadImage() {
-    html2canvas(document.getElementById('overall_container') || document.querySelector("div[style*='position: relative']"))
-      .then(function(canvas) {
-          var link = document.createElement('a');
-          link.download = 'squad.png';
-          link.href = canvas.toDataURL();
-          link.click();
-      });
-}
-</script>
 """
 
 st.subheader("AS MONTANA - Squad")
-components.html(overall_html, height=field_height+100)
+components.html(overall_html, height=field_height+20)
