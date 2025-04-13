@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 # --- Datos de jugadores ---
 all_players = {
@@ -11,7 +12,7 @@ all_players = {
 
 # Configurar la página
 st.set_page_config(layout="wide")
-st.title("⚽ Organizador de Formaciones - Vista Cancha con Fondo")
+st.title("⚽ Organizador de Formaciones - Vista Cancha con Fondo Mejorado")
 
 # -------------------------------
 # 1. CONFIGURACIÓN DE LA FORMACIÓN
@@ -125,12 +126,11 @@ def get_row_html(players, top):
                 '''
     return html
 
-# Definir posiciones verticales (en porcentaje) para cada línea;
-# se han ajustado para acercarlas un poco más
-top_forwards   = 25   # Delanteros
-top_midfield   = 45   # Mediocampistas
-top_defense    = 65   # Defensas
-top_goalkeeper = 85   # Arquero
+# Definir posiciones verticales (porcentaje de altura)
+top_forwards   = 30   # Delanteros
+top_midfield   = 50   # Mediocampistas
+top_defense    = 70   # Defensas
+top_goalkeeper = 90   # Arquero
 
 # Generar HTML para cada línea
 html_forwards = get_row_html(fwd_choices, top_forwards)
@@ -147,10 +147,10 @@ html_goalkeeper = f'''
 # Configuración de la cancha
 field_width = 800
 field_height = 600
-# Fondo de cancha (una imagen de un terreno de fútbol)
+# Imagen de un terreno de fútbol (fondo)
 field_bg = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Football_pitch.svg/800px-Football_pitch.svg.png"
 
-# Combinar todo en un contenedor con fondo de la cancha
+# Combinar todo en un contenedor con fondo de cancha
 html_field = f'''
 <div style="position: relative; width: {field_width}px; height: {field_height}px;
             background-image: url('{field_bg}'); background-size: cover; border: 2px solid #000;">
@@ -161,4 +161,5 @@ html_field = f'''
 </div>
 '''
 
-st.markdown(html_field, unsafe_allow_html=True)
+# Renderizar el HTML usando components.html para asegurarnos que se interprete y no se muestre el código crudo.
+components.html(html_field, height=field_height + 20)
