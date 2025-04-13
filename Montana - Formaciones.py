@@ -161,7 +161,7 @@ def build_defenders_html(def_central, def_izq, def_der):
         n = len(def_central)
         for i, p in enumerate(def_central):
             left_pct = (i + 1) / (n + 1) * 100
-            result += get_player_html(p, 80, left_pct, "D")
+            result += get_player_html(p, 75, left_pct, "D")
     if def_izq:
         n = len(def_izq)
         for i, p in enumerate(def_izq):
