@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
-# st.write("### Versión Final - Opción 3: Colores por Rol y Subdivisión de Mediocampistas y Defensores")
+st.write("### Versión Final - Opción 3: Colores por Rol y Subdivisión de Mediocampistas y Defensores")
 
 # ------------------------------------------------
 # 1) Datos de jugadores
