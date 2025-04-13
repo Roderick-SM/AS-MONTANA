@@ -85,7 +85,7 @@ if num_fwd > 0:
             )
             fwd_choices.append(choice)
 
-# Arquero y DT (fijos)
+# Mostrar Arquero y DT fijos
 st.markdown("#### Arquero")
 arquero = all_players["A"][0]
 st.write(f"**{arquero}**")
@@ -95,49 +95,43 @@ dt = all_players["DT"][0]
 st.write(f"**{dt}**")
 
 # -------------------------------------------------
-# 3) VISUALIZACIÓN EN LA CANCHA (columna izquierda)
-#    + SUPLENTES Y DT EN LA DERECHA
+# 3) VISUALIZACIÓN EN LA CANCHA + SUPLENTES
 # -------------------------------------------------
 st.markdown("---")
 st.header("Vista en Cancha + Suplentes")
 
-# Creamos dos columnas: cancha (3 partes) y banco (1 parte)
+# Usamos dos columnas: izquierda para la cancha y derecha para los suplentes
 col_cancha, col_banco = st.columns([3, 1])
 
-#
-# A) CANCHA
-#
 with col_cancha:
     def get_row_html(players, top):
         """
         Genera HTML para una fila de jugadores en la cancha.
-        :param players: Lista de nombres (ignoramos "(Ninguno)")
+        :param players: Lista de nombres (se ignoran "(Ninguno)")
         :param top: Posición vertical en porcentaje (0 a 100)
         :return: HTML con divs posicionados absolutamente.
         """
         html = ""
-        if players:
-            valid_players = [p for p in players if p != "(Ninguno)"]
+        valid_players = [p for p in players if p != "(Ninguno)"]
+        if valid_players:
             N = len(valid_players)
             for i, player in enumerate(valid_players):
-                # Distribuimos horizontalmente en porcentaje
                 left = (i + 1) / (N + 1) * 100  
                 html += f'''
                 <div style="position: absolute; top: {top}%; left: {left}%;
                             transform: translate(-50%, -50%); text-align: center;">
                     <div style="font-size: 36px; line-height: 32px;">●</div>
-                    <div style="font-size: 20px; font-weight: bold;">{player}</div>
+                    <div style="font-size: 20px; font-weight: bold; color: #fff;">{player}</div>
                 </div>
                 '''
         return html
 
-    # Ajustamos porcentajes de cada línea
+    # Posiciones verticales en porcentaje para cada línea
     top_forwards   = 25   # Delanteros
     top_midfield   = 50   # Mediocampistas
     top_defense    = 75   # Defensas
     top_goalkeeper = 90   # Arquero
 
-    # Generamos HTML para cada línea
     html_forwards = get_row_html(fwd_choices, top_forwards)
     html_midfield = get_row_html(mid_choices, top_midfield)
     html_defense  = get_row_html(defender_choices, top_defense)
@@ -145,19 +139,24 @@ with col_cancha:
     <div style="position: absolute; top: {top_goalkeeper}%; left: 50%;
                 transform: translate(-50%, -50%); text-align: center;">
         <div style="font-size: 36px; line-height: 32px;">●</div>
-        <div style="font-size: 20px; font-weight: bold;">{arquero}</div>
+        <div style="font-size: 20px; font-weight: bold; color: #fff;">{arquero}</div>
     </div>
     """
 
-    # Imagen de la cancha verde con líneas
+    # Configuración de la cancha: usamos un SVG de futbol de Wikipedia
     field_width = 800
     field_height = 550
-    field_bg = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Football_pitch.svg/1200px-Football_pitch.svg.png"
+    # Fondo: cancha verde con líneas (SVG)
+    field_bg = "https://upload.wikimedia.org/wikipedia/commons/4/47/Football_pitch.svg"
 
-    # Contenedor HTML con la cancha de fondo
+    # Contenedor HTML con color de fondo verde como respaldo y la imagen con las líneas
     html_field = f"""
     <div style="position: relative; width: {field_width}px; height: {field_height}px;
-                background: url('{field_bg}') no-repeat center/cover;
+                background-color: #1e7d36;
+                background-image: url('{field_bg}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
                 border: 2px solid #000; margin-bottom: 20px;">
         {html_forwards}
         {html_midfield}
@@ -166,25 +165,19 @@ with col_cancha:
     </div>
     """
 
-    # Renderizamos el HTML
     components.html(html_field, height=field_height + 40)
 
-#
-# B) BANCO DE SUPLENTES + DT
-#
 with col_banco:
     st.subheader("Suplentes")
-
-    # Para listar suplentes, calculamos quién NO fue elegido en cada posición
+    # Calculamos los suplentes: los que NO fueron seleccionados
     chosen_defenders = [p for p in defender_choices if p != "(Ninguno)"]
-    chosen_mids      = [p for p in mid_choices if p != "(Ninguno)"]
-    chosen_forwards  = [p for p in fwd_choices if p != "(Ninguno)"]
+    chosen_mids = [p for p in mid_choices if p != "(Ninguno)"]
+    chosen_forwards = [p for p in fwd_choices if p != "(Ninguno)"]
 
     bench_def = sorted(set(all_players["D"]) - set(chosen_defenders))
     bench_mid = sorted(set(all_players["M"]) - set(chosen_mids))
     bench_fwd = sorted(set(all_players["F"]) - set(chosen_forwards))
 
-    # Mostramos suplentes por posición (solo si hay alguno)
     if bench_def:
         st.markdown("**Defensas**")
         for p in bench_def:
@@ -200,7 +193,6 @@ with col_banco:
         for p in bench_fwd:
             st.write(p)
 
-    # Al final, DT
     st.markdown("---")
     st.subheader("DT")
     st.write(dt)
