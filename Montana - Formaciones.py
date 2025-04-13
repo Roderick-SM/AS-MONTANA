@@ -1,74 +1,117 @@
 import streamlit as st
 
-# Datos
+# --- DATOS DE JUGADORES ---
 all_players = {
-    "A": ["Axel"],
+    "A": ["Axel"],  # Arqueros
     "D": ["David", "Manu", "Joaco", "Sebastian", "Ale", "Gaston", "Marius", "Rodri A"],
     "M": ["Pedro", "Juan Colombia", "Alex", "Gonza", "Lauti", "Bash", "Nico", "Rodri P"],
     "F": ["Rodri SM", "Fer", "Parga", "Matheus", "Paco"],
     "DT": ["Diego"],
 }
 
+# Formaciones = cantidad de defensas, mediocampistas, delanteros
 formations = {
-    4: [[2, 1, 1], [1, 2, 1]],
-    5: [[2, 2, 1], [1, 2, 2]],
-    6: [[2, 3, 1], [3, 2, 1], [2, 2, 2]],
-    7: [[3, 3, 1], [2, 3, 2], [3, 2, 2]],
-    8: [[4, 3, 1], [3, 3, 2], [3, 2, 3]],
-    9: [[4, 4, 1], [3, 4, 2], [3, 3, 3]],
-    10: [[4, 4, 2], [3, 4, 3]],
+    (4,3,3): "4-3-3",
+    (4,4,2): "4-4-2",
+    (3,5,2): "3-5-2",
+    (3,4,3): "3-4-3",
+    (5,3,2): "5-3-2",
+    (2,3,1): "2-3-1",  # para 6 jugadores + arquero
+    (2,2,2): "2-2-2",  # etc.
+    # Agrega las formaciones que quieras
 }
 
 st.set_page_config(layout="wide")
-st.title("⚽ Organizador de Formaciones")
+st.title("⚽ Organizador de Formaciones con Selección Manual")
 
-# Selección de cantidad y formación
-num_players = st.selectbox("Cantidad de jugadores (sin contar arquero)", list(formations.keys()))
-formation_list = formations[num_players]
-formation = st.selectbox("Formación (Defensa - Medio - Ataque)", formation_list)
+# 1) Elegir cantidad de jugadores (excl. arquero)
+#    Filtramos sólo las formaciones que sumen esa cantidad
+num_players = st.slider("Cantidad de jugadores de campo (excluyendo arquero)", 
+                        min_value=4, max_value=10, value=6)
 
-# Selección automática de jugadores
-outfield = all_players["D"] + all_players["M"] + all_players["F"]
-selected = outfield[:num_players]
-bench = outfield[num_players:num_players + 5]
+valid_formations = {
+    k: v for k, v in formations.items() if sum(k) == num_players
+}
 
-defenders = selected[:formation[0]]
-midfielders = selected[formation[0]:formation[0]+formation[1]]
-forwards = selected[formation[0]+formation[1]:]
+if not valid_formations:
+    st.warning("No hay formaciones predefinidas que coincidan con ese número de jugadores")
+    st.stop()
 
-# Layout cancha + banco
-col_cancha, col_banco = st.columns([4, 1])
+# 2) Elegir una de las formaciones disponibles
+formation_key = st.selectbox(
+    "Elige formación (Defensas-Medios-Delanteros)",
+    list(valid_formations.keys()),
+    format_func=lambda k: valid_formations[k]
+)
 
-with col_cancha:
-    st.markdown("### 🏟️ Cancha")
-    st.markdown(f"**Formación:** {formation[0]} - {formation[1]} - {formation[2]}")
+num_defenders, num_mids, num_forwards = formation_key
 
-    # Delanteros
-    st.markdown("#### 🔥 Delanteros")
-    cols = st.columns(formation[2])
-    for i, p in enumerate(forwards):
-        cols[i].markdown(f"**{p}**")
+# --- Sección para “disponibilidad manual” ---
+st.markdown("### Selección de Jugadores por Posición")
 
-    # Mediocampistas
-    st.markdown("#### 🎯 Mediocampistas")
-    cols = st.columns(formation[1])
-    for i, p in enumerate(midfielders):
-        cols[i].markdown(f"**{p}**")
+# Recuperamos la lista de defensores, mediocampistas y delanteros
+defenders_available = all_players["D"]
+mids_available = all_players["M"]
+forwards_available = all_players["F"]
 
-    # Defensores
-    st.markdown("#### 🛡️ Defensores")
-    cols = st.columns(formation[0])
-    for i, p in enumerate(defenders):
-        cols[i].markdown(f"**{p}**")
+# Con Streamlit, si queremos evitar que el usuario repita jugadores, debemos controlar un set
+# o marcarlos como “usados”. Ejemplo sencillo: no dejamos que se repitan, pero no lo forzamos
+# (cada selectbox mostrará TODOS los jugadores de esa categoría). 
+# Para hacerlo sin repetir, habría que programar más lógica con st.session_state.
 
-    # Arquero
-    st.markdown("#### 🧤 Arquero")
-    st.markdown(f"**{all_players['A'][0]}**")
+chosen_defenders = []
+chosen_mids = []
+chosen_forwards = []
 
-with col_banco:
-    st.markdown("### 🪑 Suplentes")
-    for p in bench:
-        st.write(p)
+st.subheader("Defensas")
+def_col = st.columns(num_defenders)
+for i in range(num_defenders):
+    with def_col[i]:
+        d = st.selectbox(
+            f"Defensa {i+1}",
+            options=["(ninguno)"] + defenders_available
+        )
+        chosen_defenders.append(d)
 
-    st.markdown("### 🎩 DT")
-    st.write(all_players["DT"][0])
+st.subheader("Mediocampistas")
+mid_col = st.columns(num_mids)
+for i in range(num_mids):
+    with mid_col[i]:
+        m = st.selectbox(
+            f"Mediocampista {i+1}",
+            options=["(ninguno)"] + mids_available
+        )
+        chosen_mids.append(m)
+
+st.subheader("Delanteros")
+fwd_col = st.columns(num_forwards)
+for i in range(num_forwards):
+    with fwd_col[i]:
+        fwd = st.selectbox(
+            f"Delantero {i+1}",
+            options=["(ninguno)"] + forwards_available
+        )
+        chosen_forwards.append(fwd)
+
+# 3) Mostrar al arquero
+st.markdown("### Arquero")
+st.write(all_players["A"][0])
+
+# 4) DT (opcional)
+st.markdown("### DT")
+st.write(all_players["DT"][0])
+
+# --- Sección final con Resumen Visual ---
+st.markdown("---")
+st.markdown("## Resumen de la Formación")
+st.write(f"Formación: **{valid_formations[formation_key]}**  \n"
+         f"Defensas: {chosen_defenders}  \n"
+         f"Mediocampistas: {chosen_mids}  \n"
+         f"Delanteros: {chosen_forwards}  \n"
+         f"Arquero: {all_players['A'][0]}  \n"
+         f"DT: {all_players['DT'][0]}")
+
+# Banco (jugadores que no asigné, si querés)
+# Ejemplo: sacamos de la lista total los que elegimos para titular
+# O generamos una lista con los no seleccionados
+# Para simplificar, lo omitimos acá o lo hacemos con sets.
