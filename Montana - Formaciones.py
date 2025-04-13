@@ -9,109 +9,122 @@ all_players = {
     "DT": ["Diego"],
 }
 
-# Formaciones = cantidad de defensas, mediocampistas, delanteros
-formations = {
-    (4,3,3): "4-3-3",
-    (4,4,2): "4-4-2",
-    (3,5,2): "3-5-2",
-    (3,4,3): "3-4-3",
-    (5,3,2): "5-3-2",
-    (2,3,1): "2-3-1",  # para 6 jugadores + arquero
-    (2,2,2): "2-2-2",  # etc.
-    # Agrega las formaciones que quieras
-}
-
 st.set_page_config(layout="wide")
-st.title("⚽ Organizador de Formaciones con Selección Manual")
+st.title("⚽ Organizador de Formaciones con Máxima Flexibilidad")
 
-# 1) Elegir cantidad de jugadores (excl. arquero)
-#    Filtramos sólo las formaciones que sumen esa cantidad
-num_players = st.slider("Cantidad de jugadores de campo (excluyendo arquero)", 
-                        min_value=4, max_value=10, value=6)
-
-valid_formations = {
-    k: v for k, v in formations.items() if sum(k) == num_players
-}
-
-if not valid_formations:
-    st.warning("No hay formaciones predefinidas que coincidan con ese número de jugadores")
-    st.stop()
-
-# 2) Elegir una de las formaciones disponibles
-formation_key = st.selectbox(
-    "Elige formación (Defensas-Medios-Delanteros)",
-    list(valid_formations.keys()),
-    format_func=lambda k: valid_formations[k]
+# 1) Elegir cuántos jugadores de campo (excluyendo arquero)
+num_players = st.number_input(
+    "Número de jugadores de campo (excl. arquero)",
+    min_value=0, max_value=10, value=5
 )
 
-num_defenders, num_mids, num_forwards = formation_key
+# 2) Definir cuántos serán Defensas, Mediocampistas y Delanteros
+st.subheader("Distribución de Jugadores en la Cancha")
+def_col, mid_col, fwd_col = st.columns(3)
 
-# --- Sección para “disponibilidad manual” ---
-st.markdown("### Selección de Jugadores por Posición")
+with def_col:
+    num_def = st.number_input(
+        "Defensas",
+        min_value=0, max_value=num_players, value=2
+    )
+with mid_col:
+    num_mid = st.number_input(
+        "Mediocampistas",
+        min_value=0, max_value=num_players, value=2
+    )
+with fwd_col:
+    num_fwd = st.number_input(
+        "Delanteros",
+        min_value=0, max_value=num_players, value=1
+    )
 
-# Recuperamos la lista de defensores, mediocampistas y delanteros
-defenders_available = all_players["D"]
-mids_available = all_players["M"]
-forwards_available = all_players["F"]
+# Validamos que la suma de D+M+F coincida con el total elegido
+if (num_def + num_mid + num_fwd) != num_players:
+    st.error(f"La suma (D+M+F) debe ser igual a {num_players}. Corrígelo para continuar.")
+    st.stop()
 
-# Con Streamlit, si queremos evitar que el usuario repita jugadores, debemos controlar un set
-# o marcarlos como “usados”. Ejemplo sencillo: no dejamos que se repitan, pero no lo forzamos
-# (cada selectbox mostrará TODOS los jugadores de esa categoría). 
-# Para hacerlo sin repetir, habría que programar más lógica con st.session_state.
+# 3) Seleccionar manualmente cada jugador para cada línea
+st.markdown("---")
+st.subheader("Asignación de Jugadores a Posiciones")
 
-chosen_defenders = []
-chosen_mids = []
-chosen_forwards = []
+defender_choices = []
+mid_choices = []
+fwd_choices = []
 
-st.subheader("Defensas")
-def_col = st.columns(num_defenders)
-for i in range(num_defenders):
-    with def_col[i]:
-        d = st.selectbox(
-            f"Defensa {i+1}",
-            options=["(ninguno)"] + defenders_available
-        )
-        chosen_defenders.append(d)
+# --- DEFENSAS ---
+if num_def > 0:
+    st.markdown("#### Defensas")
+    cols_def = st.columns(num_def)
+    for i in range(num_def):
+        with cols_def[i]:
+            player = st.selectbox(
+                f"Defensa {i+1}",
+                options=["(Ninguno)"] + all_players["D"],
+                key=f"def_{i}"  # Para que no choquen los keys
+            )
+            defender_choices.append(player)
 
-st.subheader("Mediocampistas")
-mid_col = st.columns(num_mids)
-for i in range(num_mids):
-    with mid_col[i]:
-        m = st.selectbox(
-            f"Mediocampista {i+1}",
-            options=["(ninguno)"] + mids_available
-        )
-        chosen_mids.append(m)
+# --- MEDIOCAMPISTAS ---
+if num_mid > 0:
+    st.markdown("#### Mediocampistas")
+    cols_mid = st.columns(num_mid)
+    for i in range(num_mid):
+        with cols_mid[i]:
+            player = st.selectbox(
+                f"Mediocampista {i+1}",
+                options=["(Ninguno)"] + all_players["M"],
+                key=f"mid_{i}"
+            )
+            mid_choices.append(player)
 
-st.subheader("Delanteros")
-fwd_col = st.columns(num_forwards)
-for i in range(num_forwards):
-    with fwd_col[i]:
-        fwd = st.selectbox(
-            f"Delantero {i+1}",
-            options=["(ninguno)"] + forwards_available
-        )
-        chosen_forwards.append(fwd)
+# --- DELANTEROS ---
+if num_fwd > 0:
+    st.markdown("#### Delanteros")
+    cols_fwd = st.columns(num_fwd)
+    for i in range(num_fwd):
+        with cols_fwd[i]:
+            player = st.selectbox(
+                f"Delantero {i+1}",
+                options=["(Ninguno)"] + all_players["F"],
+                key=f"fwd_{i}"
+            )
+            fwd_choices.append(player)
 
-# 3) Mostrar al arquero
-st.markdown("### Arquero")
+# 4) Mostrar Arquero Fijo y DT
+st.markdown("#### Arquero")
 st.write(all_players["A"][0])
 
-# 4) DT (opcional)
-st.markdown("### DT")
+st.markdown("#### DT")
 st.write(all_players["DT"][0])
 
-# --- Sección final con Resumen Visual ---
+# --- VISUALIZACIÓN FINAL TIPO “CANCHA” ---
 st.markdown("---")
-st.markdown("## Resumen de la Formación")
-st.write(f"Formación: **{valid_formations[formation_key]}**  \n"
-         f"Defensas: {chosen_defenders}  \n"
-         f"Mediocampistas: {chosen_mids}  \n"
-         f"Delanteros: {chosen_forwards}  \n"
-         f"Arquero: {all_players['A'][0]}  \n"
-         f"DT: {all_players['DT'][0]}")
+st.markdown("## Visualización en la Cancha")
 
-# Banco (jugadores que no asigné, si querés)
-# Ejemplo: sacamos de la lista total los que elegimos para titular
-# O generamos una lista con los no seleccionados
-# Para simplificar, lo omitimos acá o lo hacemos con sets.
+# Para simular un layout “tipo FIFA”, mostramos:
+# Forwards (arriba) -> Midfielders (medio) -> Defenders (abajo) -> GK
+
+# --- DELANTEROS ---
+if num_fwd > 0:
+    st.markdown("#### Delanteros (arriba)")
+    row_forwards = st.columns(num_fwd)
+    for i, fwd_name in enumerate(fwd_choices):
+        row_forwards[i].markdown(f"**{fwd_name}**")
+
+# --- MEDIOCAMPISTAS ---
+if num_mid > 0:
+    st.markdown("#### Mediocampistas (centro)")
+    row_mids = st.columns(num_mid)
+    for i, mid_name in enumerate(mid_choices):
+        row_mids[i].markdown(f"**{mid_name}**")
+
+# --- DEFENSAS ---
+if num_def > 0:
+    st.markdown("#### Defensas (abajo)")
+    row_defs = st.columns(num_def)
+    for i, def_name in enumerate(defender_choices):
+        row_defs[i].markdown(f"**{def_name}**")
+
+# --- ARQUERO ---
+st.markdown("#### Arquero (última línea)")
+st.markdown(f"**{all_players['A'][0]}**")
