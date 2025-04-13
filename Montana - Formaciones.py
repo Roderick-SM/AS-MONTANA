@@ -235,32 +235,27 @@ field_html = f"""
 # b) Panel de suplentes (lado derecho, 150x600, con fondo gris)
 # Orden: Delanteros, Medio, Defensa; DT más abajo.
 # -------------------
-suplentes_html = "<div style='position: absolute; right: 0; top: 0; width: 150px; height: 600px; "
-suplentes_html += "background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
-suplentes_html += "<div style='text-align: center; font-weight: bold; margin-bottom: 10px;'>Suplentes</div>"
-suplentes_html += "</div>"
+suplentes_html = "<div style='position: absolute; right: 0; top: 0; width: 150px; height: 600px; background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
+suplentes_html += "<div style='text-align: center; font-weight: bold; margin-bottom: 20px;'>Suplentes</div>"
 
 if suplentes_fwd:
-    suplentes_html += "<div><strong>Delanteros:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0;'>{p}</li>" for p in suplentes_fwd]) + "</ul></div>"
+    suplentes_html += "<div style='margin-bottom: 15px;'><strong>Delanteros:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0 0 5px 0;'>{p}</li>" for p in suplentes_fwd]) + "</ul></div>"
 else:
-    suplentes_html += "<div><strong>Delanteros:</strong> Ninguno</div>"
-suplentes_html += "</div>"
+    suplentes_html += "<div style='margin-bottom: 15px;'><strong>Delanteros:</strong> Ninguno</div>"
 
 if suplentes_mid:
-    suplentes_html += "<div><strong>Medio:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0;'>{p}</li>" for p in suplentes_mid]) + "</ul></div>"
+    suplentes_html += "<div style='margin-bottom: 15px;'><strong>Medio:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0 0 5px 0;'>{p}</li>" for p in suplentes_mid]) + "</ul></div>"
 else:
-    suplentes_html += "<div><strong>Medio:</strong> Ninguno</div>"
-suplentes_html += "</div>"
+    suplentes_html += "<div style='margin-bottom: 15px;'><strong>Medio:</strong> Ninguno</div>"
 
 if suplentes_def:
-    suplentes_html += "<div><strong>Defensa:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0;'>{p}</li>" for p in suplentes_def]) + "</ul></div>"
+    suplentes_html += "<div style='margin-bottom: 15px;'><strong>Defensa:</strong><ul style='margin:0; padding-left: 15px;'>" + "".join([f"<li style='list-style: disc; margin: 0 0 5px 0;'>{p}</li>" for p in suplentes_def]) + "</ul></div>"
 else:
-    suplentes_html += "<div><strong>Defensa:</strong> Ninguno</div>"
-suplentes_html += "</div>"
+    suplentes_html += "<div style='margin-bottom: 15px;'><strong>Defensa:</strong> Ninguno</div>"
 
 suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>DT:</strong> " + all_players['DT'][0] + "</div>"
 
-suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>Formación elegida:</strong> " + formation_str + "</div>"
+suplentes_html += "<div style='margin-top: 20px; text-align: center; font-size: 22px; font-weight: bold;'><strong>Formacion:</strong> <span style='font-size: 22px; font-weight: bold;'>" + formation_str + "</span></div>"
 
 suplentes_html += "</div>"
 
