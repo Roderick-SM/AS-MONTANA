@@ -1,11 +1,11 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# st.set_page_config debe ser la primera llamada
+# 1) Llamada temprana a set_page_config
 st.set_page_config(layout="wide")
 
-# Indicador de versión para comprobar la actualización
-st.write("### Versión 2.3 - Final")
+# Indicador de versión
+st.write("### Versión 2.4 - Media Cancha + Área de Arqueros")
 
 # --------------------------
 # 1. DATOS DE JUGADORES
@@ -43,7 +43,7 @@ if (num_def + num_mid + num_fwd) != num_players:
     st.stop()
 
 # --------------------------
-# 3. ASIGNACIÓN DE JUGADORES EN LA CANCHA (TITULARES)
+# 3. ASIGNACIÓN EN LA CANCHA (TITULARES)
 # --------------------------
 st.markdown("---")
 st.header("Asignación de Jugadores en la Cancha")
@@ -54,14 +54,13 @@ def select_players(cat_key, num, key_prefix, label):
         st.subheader(f"{label} (en cancha)")
         cols = st.columns(num)
         for i in range(num):
-            # Cada select muestra solo los nombres que aún NO se eligieron en esa categoría.
+            # Cada selectbox filtra jugadores ya elegidos en esa misma categoría
             available = ["(Ninguno)"] + [p for p in all_players[cat_key] if p not in choices]
             with cols[i]:
                 sel = st.selectbox(f"{label} {i+1}", available, key=f"{key_prefix}_{i}")
             choices.append(sel)
     return choices
 
-# Se usan los nombres completos para las secciones:
 defender_choices = select_players("D", num_def, "def", "Defensores")
 mid_choices      = select_players("M", num_mid, "mid", "Mediocampistas")
 fwd_choices      = select_players("F", num_fwd, "fwd", "Delanteros")
@@ -80,7 +79,7 @@ st.write(f"**{dt}**")
 st.markdown("---")
 st.header("Suplentes y Reservas")
 
-# Esta sección se procesa para seleccionar suplentes y calcular reservas
+# Selección de suplentes y cálculo de reservas
 col_dummy, col_suplentes = st.columns([2, 1])
 with col_suplentes:
     st.subheader("Suplentes")
@@ -93,32 +92,33 @@ with col_suplentes:
     suplentes_fwd = st.multiselect(
         "Delanteros:", options=[p for p in all_players["F"] if p not in fwd_choices]
     )
+
     st.markdown("**DT:**")
     st.write(dt)
-    
-    usados = set(defender_choices + mid_choices + fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd)
+
+    used = set(defender_choices + mid_choices + fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd)
     all_outfield = set(all_players["D"] + all_players["M"] + all_players["F"])
-    reservas = sorted(list(all_outfield - usados))
-    
+    reservas = sorted(list(all_outfield - used))
+
     st.markdown("---")
     st.subheader("Reservas")
     if reservas:
-        st.markdown("\n".join([f"- {p}" for p in reservas]))
+        for r in reservas:
+            st.write("- " + r)
     else:
-        st.markdown("Ninguna")
+        st.write("Ninguna")
 
 # --------------------------
-# 5. VISUALIZACIÓN DE LA CANCHA Y LISTA DE SUPLENTES (ORIENTACIÓN VERTICAL)
+# 5. VISUALIZACIÓN DE MEDIA CANCHA + SUPLENTES (AL LADO)
 # --------------------------
-# Se crean dos columnas: 
-# - La izquierda muestra la visualización del campo en formato vertical.
-# - La derecha muestra la lista de suplentes con fondo oscuro y texto blanco.
-col_field, col_lista = st.columns([2, 1])
+# Para que estén más cerca, usamos columns([3,2]) en vez de [2,1]
+col_field, col_lista = st.columns([3,2])
 with col_field:
     st.header("AS MONTANA - SQUAD")
-    
+
+    # Función para posicionar jugadores horizontalmente,
+    # con 'top' indicando la altura en % (del contenedor 600×400).
     def get_row_html(players, top_pct):
-        """Genera HTML para una fila de jugadores distribuidos horizontalmente."""
         html = ""
         valid = [p for p in players if p != "(Ninguno)"]
         if valid:
@@ -128,44 +128,98 @@ with col_field:
                 html += f"""
                 <div style="position: absolute; top: {top_pct}%; left: {left_pct}%;
                             transform: translate(-50%, -50%); text-align: center;">
-                    <div style="font-size: 36px; color: #fff;">●</div>
-                    <div style="font-size: 22px; font-weight: bold; color: #fff;">{player}</div>
+                    <div style="font-size: 24px; color: #fff;">●</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #fff;">{player}</div>
                 </div>
                 """
         return html
 
-    # Los porcentajes verticales:
-    # Delanteros en 20% (parte superior)
-    # Mediocampistas en 45%
-    # Defensores en 70%
-    # Arquero en 90% (parte inferior)
-    html_fwd = get_row_html(fwd_choices, 20)
-    html_mid = get_row_html(mid_choices, 45)
-    html_def = get_row_html(defender_choices, 70)
-    html_gk  = get_row_html([arquero], 90)
-    
-    field_width = 550
-    field_height = 800
+    # Cálculo de la formación, p. ej. "2-3-1"
+    formation_str = f"{num_def}-{num_mid}-{num_fwd}"
 
-    html_field = f"""
+    # Distancias verticales (de abajo hacia arriba):
+    #  - Arquero: 85% (cerca del "fondo")
+    #  - Defensores: 65%
+    #  - Mediocampistas: 45%
+    #  - Delanteros: 25%
+    html_gk  = get_row_html([arquero], 85)
+    html_def = get_row_html(defender_choices, 65)
+    html_mid = get_row_html(mid_choices, 45)
+    html_fwd = get_row_html(fwd_choices, 25)
+
+    # Definimos contenedor "media cancha": 600×400
+    # Dibujamos la portería, área penal, área chica, punto penal y un semicírculo.
+    # La portería estará en x=0, la línea de media cancha en x=600 (no se dibuja, pues solo se ve "nuestra mitad").
+    field_width = 600
+    field_height = 400
+
+    html_half_field = f"""
     <div style="position: relative; width: {field_width}px; height: {field_height}px;
-             background-color: #1e7d36; border: 2px solid #000; margin-bottom: 20px;">
-        <!-- Línea central horizontal -->
-        <div style="position: absolute; top: {field_height/2}px; left: 0;
-                    width: 100%; height: 2px; background: white;"></div>
-        <!-- Círculo central -->
-        <div style="position: absolute; left: 50%; top: 50%; width: 80px; height: 80px;
-                    margin-left: -40px; margin-top: -40px; border: 2px solid white; border-radius: 50%;"></div>
+                background-color: #1e7d36; border: 2px solid #000; margin-bottom: 5px;">
+
+        <!-- Línea de gol (x=0) -->
+        <div style="position: absolute; left: 0px; top: 0px; width: 2px; height: 100%; background: white;"></div>
+
+        <!-- Portería: un rectángulo de 8% de ancho por 14% de alto (aprox) -->
+        <div style="
+            position: absolute; left: -10px; top: 160px; 
+            width: 10px; height: 80px; 
+            border: 2px solid #fff;
+            background: none;
+        "></div>
+
+        <!-- Área penal: x=0..80, y=80..320 (rectángulo) -->
+        <div style="
+            position: absolute; left: 0px; top: 80px; 
+            width: 80px; height: 240px; 
+            border: 2px solid #fff;
+        "></div>
+
+        <!-- Área chica: x=0..35, y=140..260 (rectángulo) -->
+        <div style="
+            position: absolute; left: 0px; top: 140px; 
+            width: 35px; height: 120px; 
+            border: 2px solid #fff;
+        "></div>
+
+        <!-- Punto penal: x=60, y=200 (un punto blanco de 4x4px) -->
+        <div style="
+            position: absolute; left: 60px; top: 200px; 
+            width: 4px; height: 4px; 
+            background: #fff; 
+            border-radius: 50%; 
+            transform: translate(-50%, -50%);
+        "></div>
+
+        <!-- Semicírculo (radio=60px) centrado en x=60, y=200, mostrando la parte exterior:
+             Para simplificar, dibujamos un círculo con overflow hidden para simular semicírculo.
+        -->
+        <div style="
+            position: absolute; left: 60px; top: 200px; 
+            width: 120px; height: 120px;
+            margin-left: -60px; margin-top: -60px; 
+            border: 2px solid #fff; 
+            border-radius: 50%;
+            background: none;
+            clip-path: inset(0 0 0 60px); /* Muestra mitad derecha */
+        "></div>
+
+        <!-- {html_fwd} {html_mid} {html_def} {html_gk} -->
         {html_fwd}
         {html_mid}
         {html_def}
         {html_gk}
     </div>
     """
-    components.html(html_field, height=field_height + 40)
+
+    # Renderizamos la media cancha
+    components.html(html_half_field, height=field_height + 20)
+
+    # Mostramos la formación debajo
+    st.markdown(f"**Formación elegida:** {formation_str}")
 
 with col_lista:
-    st.header("Lista de Suplentes")
+    st.header("Lista de Suplentes (Fondo Oscuro)")
     supl_html = "<div style='background-color: #333; color: #fff; padding: 10px; border-radius: 5px;'>"
     supl_html += "<h3 style='margin-top:0;'>Suplentes</h3>"
     if suplentes_def:
