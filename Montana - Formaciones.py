@@ -255,6 +255,9 @@ else:
     suplentes_html += "<div><strong>Defensa:</strong> Ninguno</div>"
 
 suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>DT:</strong> " + all_players['DT'][0] + "</div>"
+
+suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>Formación elegida:</strong> " + {formation_str} + "</div>"
+
 suplentes_html += "</div>"
 
 # -------------------
