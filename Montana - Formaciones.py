@@ -206,8 +206,17 @@ def build_players_html(gk, def_central, def_izq, def_der, mid_izq, mid_der, mid_
     return result
 
 
-players_html = build_players_html([arquero], defender_choices, mid_izq_choices, mid_der_choices, mid_def_choices, mid_ofen_choices, fwd_choices)
-
+players_html = build_players_html(
+    [arquero],
+    def_central_choices,
+    def_izq_choices,
+    def_der_choices,
+    mid_izq_choices,
+    mid_der_choices,
+    mid_def_choices,
+    mid_ofen_choices,
+    fwd_choices
+)
 # -------------------
 # a) Cancha (lado izquierdo, 400x600) con fondo "stripes" y área penal con menor altura
 # -------------------
