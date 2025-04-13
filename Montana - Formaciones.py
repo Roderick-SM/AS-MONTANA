@@ -195,7 +195,7 @@ field_html = f"""
     <div style="position: absolute; left: 60px; top: 500px; width: 280px; height: 120px; border: 2px solid white;"></div>
     
     <!-- Área chica -->
-    <div style="position: absolute; left: 160px; top: 560px; width: 80px; height: 60px; border: 2px solid white;"></div>
+    <div style="position: absolute; left: 160px; top: 580px; width: 80px; height: 60px; border: 2px solid white;"></div>
     
     <!-- Semicírculo frente al área -->
     <div style="position: absolute; top: 500px; left: 200px;
