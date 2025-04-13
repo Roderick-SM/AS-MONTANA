@@ -1,196 +1,104 @@
 import streamlit as st
-import streamlit.components.v1 as components
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
-# --- DATOS DE JUGADORES ---
-all_players = {
-    "A": ["Axel"],  # Arquero
-    "D": ["David", "Manu", "Joaco", "Sebastian", "Ale", "Gaston", "Marius", "Rodri A"],
-    "M": ["Pedro", "Juan Colombia", "Alex", "Gonza", "Lauti", "Bash", "Nico", "Rodri P"],
-    "F": ["Rodri SM", "Fer", "Parga", "Matheus", "Paco"],
-    "DT": ["Diego"],
-}
+# Datos iniciales en categorías iniciales
+def init_data():
+    return {
+        "Disponible": ['Axel', 'Rodri SM', 'Fer', 'Pedro', 'David', 'Manu', 'Parga', 'Juan Colombia', 'Alex', 'Matheus'],
+        "No Puede / Trabaja": ['Joaco'],
+        "No responde": ['Gonza', 'Lauti', 'Bash', 'Paco', 'Sebastian'],
+        "Fuera de París": ['Ale', 'Nico', 'Rodri P', 'Gaston', 'Marius'],
+        "Lesionado": ['Rodri A'],
+        "Asados": ['Diego']
+    }
 
-st.set_page_config(layout="wide")
-st.title("⚽ Organizador de Formaciones - Cancha Verde con Líneas + Suplentes + DT")
+# Inicialización
+if 'jugadores' not in st.session_state:
+    st.session_state.jugadores = init_data()
 
-# -------------------------------------------------
-# 1) CONFIGURACIÓN DE LA FORMACIÓN
-# -------------------------------------------------
-st.header("Configuración de la Formación")
+# Interfaz para mover jugadores
+st.title("AS MONTANA - Gestión jugadores")
 
-num_players = st.number_input(
-    "Número de jugadores de campo (excluyendo arquero)",
-    min_value=0, max_value=10, value=5, step=1
-)
+# Mover jugador
+with st.sidebar:
+    st.header("Mover jugador entre categorías")
+    jugador = st.selectbox("Selecciona jugador", sum(st.session_state.jugadores.values(), []))
+    nueva_categoria = st.selectbox("Nueva categoría", list(st.session_state.jugadores.keys()))
 
-col_dist = st.columns(3)
-with col_dist[0]:
-    num_def = st.number_input("Defensas", min_value=0, max_value=num_players, value=2, step=1)
-with col_dist[1]:
-    num_mid = st.number_input("Mediocampistas", min_value=0, max_value=num_players, value=2, step=1)
-with col_dist[2]:
-    num_fwd = st.number_input("Delanteros", min_value=0, max_value=num_players, value=1, step=1)
+    if st.button("Mover jugador"):
+        # Remover de categoría anterior
+        for cat in st.session_state.jugadores:
+            if jugador in st.session_state.jugadores[cat]:
+                st.session_state.jugadores[cat].remove(jugador)
+                break
+        # Añadir a nueva categoría
+        st.session_state.jugadores[nueva_categoria].append(jugador)
 
-if (num_def + num_mid + num_fwd) != num_players:
-    st.error(f"La suma (D+M+F) debe ser igual a {num_players}. Corrígelo antes de continuar.")
-    st.stop()
+# Dibujar cancha y jugadores
+import matplotlib.image as mpimg
+import os
+fig, ax = plt.subplots(figsize=(14, 9))
+ax.set_xlim(0, 100)
+ax.set_ylim(0, 50)
 
-# -------------------------------------------------
-# 2) ASIGNACIÓN MANUAL DE JUGADORES
-# -------------------------------------------------
-st.markdown("---")
-st.header("Asignación de Jugadores por Posición")
-st.markdown("Selecciona el jugador para cada puesto. Si no asignás alguno, aparecerá '(Ninguno)'.")
+# Fondo
+ax.add_patch(patches.Rectangle((0, 0), 50, 50, color='#7FCB7F'))
+ax.add_patch(patches.Rectangle((50, 0), 50, 50, color='#B1D7A3'))
+ax.plot([50, 50], [0, 50], color="white", linewidth=2)
+ax.add_patch(patches.Circle((50, 25), 7, edgecolor='white', facecolor='none', linewidth=2))
 
-defender_choices = []
-mid_choices = []
-fwd_choices = []
+# Insertar logo en el centro del campo
+logo_path = os.path.join(os.path.dirname(__file__), 'Montana FINAL compressed.png')
+if os.path.exists(logo_path):
+    logo_img = mpimg.imread(logo_path)
+    ax.imshow(logo_img, extent=[43, 57, 18, 32], zorder=5)
 
-# Defensas
-if num_def > 0:
-    st.subheader("Defensas")
-    cols_def = st.columns(num_def)
-    for i in range(num_def):
-        with cols_def[i]:
-            choice = st.selectbox(
-                f"Defensa {i+1}",
-                options=["(Ninguno)"] + all_players["D"],
-                key=f"def_{i}"
-            )
-            defender_choices.append(choice)
+# Títulos
+ax.text(20, 47, "DISPONIBLES", fontsize=16, weight='bold', color='darkgreen', ha='center')
+ax.text(75, 47, "NO DISPONIBLES", fontsize=16, weight='bold', color='darkred', ha='center')
 
-# Mediocampistas
-if num_mid > 0:
-    st.subheader("Mediocampistas")
-    cols_mid = st.columns(num_mid)
-    for i in range(num_mid):
-        with cols_mid[i]:
-            choice = st.selectbox(
-                f"Mediocampista {i+1}",
-                options=["(Ninguno)"] + all_players["M"],
-                key=f"mid_{i}"
-            )
-            mid_choices.append(choice)
+# Función posiciones
+def generate_positions(x, n, top=43, bottom=13):
+    if n == 1:
+        return [(x, (top + bottom) / 2)]
+    spacing = (top - bottom) / (n - 1)
+    return [(x, top - i * spacing) for i in range(n)]
 
-# Delanteros
-if num_fwd > 0:
-    st.subheader("Delanteros")
-    cols_fwd = st.columns(num_fwd)
-    for i in range(num_fwd):
-        with cols_fwd[i]:
-            choice = st.selectbox(
-                f"Delantero {i+1}",
-                options=["(Ninguno)"] + all_players["F"],
-                key=f"fwd_{i}"
-            )
-            fwd_choices.append(choice)
+# Graficar jugadores
+colores = {'Disponible': '#1E90FF', 'No responde': '#FF8C00', 'Fuera de París': '#FFD700', 
+           'No Puede / Trabaja': '#808080', 'Lesionado': '#FF6347', 'Asados': '#000000'}
 
-# Mostrar Arquero y DT fijos
-st.markdown("#### Arquero")
-arquero = all_players["A"][0]
-st.write(f"**{arquero}**")
+# Posiciones específicas según categoría
+x_posiciones = {'Disponible': 20, 'No responde': 63, 'Fuera de París': 73, 'No Puede / Trabaja': 83, 'Lesionado': 83, 'Asados': 93}
+y_limites = {'Disponible': (43,13), 'No responde': (43,10), 'Fuera de París': (40,15), 'No Puede / Trabaja': (45,30), 'Lesionado': (27,10), 'Asados': (35,15)}
 
-st.markdown("#### DT")
-dt = all_players["DT"][0]
-st.write(f"**{dt}**")
+for cat, jugadores in st.session_state.jugadores.items():
+    top, bottom = y_limites.get(cat, (43, 13))
+    if cat == 'Disponible' and len(jugadores) > 7:
+        mitad = len(jugadores) // 2 + len(jugadores) % 2
+        pos1 = generate_positions(10, mitad, top, bottom)
+        pos2 = generate_positions(30, len(jugadores) - mitad, top, bottom)
+        posiciones = pos1 + pos2
+    else:
+        x = x_posiciones.get(cat, 90)  # fallback en caso de error
+        posiciones = generate_positions(x, len(jugadores), top, bottom)
 
-# -------------------------------------------------
-# 3) VISUALIZACIÓN EN LA CANCHA + SUPLENTES
-# -------------------------------------------------
-st.markdown("---")
-st.header("Vista en Cancha + Suplentes")
+    
+    for i, (p, name) in enumerate(zip(posiciones, jugadores)):
+        ax.plot(p[0], p[1], 'o', markersize=15, color=colores[cat], label=cat if i == 0 else "")
+        ax.text(p[0], p[1]-2.2, name, ha='center', fontsize=10, weight='bold')
 
-# Usamos dos columnas: izquierda para la cancha y derecha para los suplentes
-col_cancha, col_banco = st.columns([3, 1])
+# Totales
+ax.text(20, 2, f"TOTAL: {len(st.session_state.jugadores['Disponible'])}", fontsize=14, weight='bold', ha='center')
+total_no_disponible = sum(len(st.session_state.jugadores[cat]) for cat in st.session_state.jugadores if cat != 'Disponible')
+ax.text(75, 2, f"TOTAL: {total_no_disponible}", fontsize=14, weight='bold', ha='center')
 
-with col_cancha:
-    def get_row_html(players, top):
-        """
-        Genera HTML para una fila de jugadores en la cancha.
-        :param players: Lista de nombres (se ignoran "(Ninguno)")
-        :param top: Posición vertical (en porcentaje del alto)
-        :return: HTML con divs posicionados absolutamente.
-        """
-        html = ""
-        valid_players = [p for p in players if p != "(Ninguno)"]
-        if valid_players:
-            N = len(valid_players)
-            for i, player in enumerate(valid_players):
-                left = (i + 1) / (N + 1) * 100  
-                html += f'''
-                <div style="position: absolute; top: {top}%; left: {left}%;
-                            transform: translate(-50%, -50%); text-align: center;">
-                    <div style="font-size: 36px; line-height: 32px; color: #fff;">●</div>
-                    <div style="font-size: 20px; font-weight: bold; color: #fff;">{player}</div>
-                </div>
-                '''
-        return html
-
-    # Posiciones verticales en porcentaje para cada línea
-    top_forwards   = 25   # Delanteros
-    top_midfield   = 50   # Mediocampistas
-    top_defense    = 75   # Defensas
-    top_goalkeeper = 90   # Arquero
-
-    html_forwards = get_row_html(fwd_choices, top_forwards)
-    html_midfield = get_row_html(mid_choices, top_midfield)
-    html_defense  = get_row_html(defender_choices, top_defense)
-    html_goalkeeper = f"""
-    <div style="position: absolute; top: {top_goalkeeper}%; left: 50%;
-                transform: translate(-50%, -50%); text-align: center;">
-        <div style="font-size: 36px; line-height: 32px; color: #fff;">●</div>
-        <div style="font-size: 20px; font-weight: bold; color: #fff;">{arquero}</div>
-    </div>
-    """
-
-    # Configuración de la cancha: se simula un campo con degradado y elementos para líneas centrales y círculo.
-    field_width = 800
-    field_height = 550
-
-    html_field = f"""
-    <div style="position: relative; width: {field_width}px; height: {field_height}px;
-                background: linear-gradient(to right, #7FCB7F 50%, #B1D7A3 50%);
-                border: 2px solid #000; margin-bottom: 20px;">
-        <!-- Línea vertical central -->
-        <div style="position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: white;"></div>
-        <!-- Círculo central -->
-        <div style="position: absolute; left: 50%; top: 50%; width: 80px; height: 80px; margin-left: -40px; margin-top: -40px;
-                    border: 2px solid white; border-radius: 50%;"></div>
-        {html_forwards}
-        {html_midfield}
-        {html_defense}
-        {html_goalkeeper}
-    </div>
-    """
-
-    components.html(html_field, height=field_height + 40)
-
-with col_banco:
-    st.subheader("Suplentes")
-    # Calculamos los suplentes: los que NO fueron seleccionados
-    chosen_defenders = [p for p in defender_choices if p != "(Ninguno)"]
-    chosen_mids = [p for p in mid_choices if p != "(Ninguno)"]
-    chosen_forwards = [p for p in fwd_choices if p != "(Ninguno)"]
-
-    bench_def = sorted(set(all_players["D"]) - set(chosen_defenders))
-    bench_mid = sorted(set(all_players["M"]) - set(chosen_mids))
-    bench_fwd = sorted(set(all_players["F"]) - set(chosen_forwards))
-
-    if bench_def:
-        st.markdown("**Defensas**")
-        for p in bench_def:
-            st.write(p)
-
-    if bench_mid:
-        st.markdown("**Mediocampistas**")
-        for p in bench_mid:
-            st.write(p)
-
-    if bench_fwd:
-        st.markdown("**Delanteros**")
-        for p in bench_fwd:
-            st.write(p)
-
-    st.markdown("---")
-    st.subheader("DT")
-    st.write(dt)
+# Leyenda en una sola fila
+handles, labels = ax.get_legend_handles_labels()
+orden_personalizado = ['Disponible', 'No responde', 'Fuera de París', 'No Puede / Trabaja', 'Lesionado', 'Asados']
+orden_labels = [label for label in orden_personalizado if label in labels]
+orden_handles = [handles[labels.index(label)] for label in orden_labels]
+ax.legend(orden_handles, orden_labels, loc='upper center', bbox_to_anchor=(0.5, -0.06), fontsize=12, ncol=6)
+ax.axis('off')
+st.pyplot(fig)
