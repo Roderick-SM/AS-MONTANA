@@ -9,20 +9,21 @@ all_players = {
     "DT": ["Diego"],
 }
 
-# Configuración de la página
+# Configurar la página
 st.set_page_config(layout="wide")
-st.title("⚽ Organizador de Formaciones - Vista Cancha")
+st.title("⚽ Organizador de Formaciones - Vista Cancha con Fondo")
 
-# --- CONFIGURACIÓN DE LA FORMACIÓN ---
+# -------------------------------
+# 1. CONFIGURACIÓN DE LA FORMACIÓN
+# -------------------------------
 st.header("Configuración de la Formación")
 
-# 1) Elegir el número total de jugadores de campo (excluyendo arquero)
+# Elegir número total de jugadores de campo (excluyendo arquero)
 num_players = st.number_input(
     "Número de jugadores de campo (excluyendo arquero)",
     min_value=0, max_value=10, value=5, step=1
 )
 
-# 2) Definir cuántos serán Defensas, Mediocampistas y Delanteros
 st.markdown("### Distribución de Jugadores en la Cancha")
 col_dist = st.columns(3)
 with col_dist[0]:
@@ -32,22 +33,23 @@ with col_dist[1]:
 with col_dist[2]:
     num_fwd = st.number_input("Delanteros", min_value=0, max_value=num_players, value=1, step=1)
 
-# Validación: La suma de D+M+F debe ser igual al total ingresado
+# Validar que la suma de posiciones coincida con el total
 if (num_def + num_mid + num_fwd) != num_players:
     st.error("La suma de Defensas, Mediocampistas y Delanteros debe ser igual a " + str(num_players))
     st.stop()
 
-# --- ASIGNACIÓN MANUAL DE JUGADORES A POSICIONES ---
+# -------------------------------
+# 2. ASIGNACIÓN MANUAL DE JUGADORES
+# -------------------------------
 st.markdown("---")
 st.header("Asignación de Jugadores por Posición")
-st.markdown("Selecciona el jugador para cada puesto. Si aún no asignás alguno, aparecerá como '(Ninguno)'.")
+st.markdown("Selecciona el jugador para cada puesto. Si no asignás alguno, aparecerá como '(Ninguno)'.")
 
-# Listas para guardar la selección de cada línea
 defender_choices = []
 mid_choices = []
 fwd_choices = []
 
-# Sección de Defensas
+# Asignar Defensas
 if num_def > 0:
     st.subheader("Defensas")
     cols_def = st.columns(num_def)
@@ -60,7 +62,7 @@ if num_def > 0:
             )
             defender_choices.append(choice)
 
-# Sección de Mediocampistas
+# Asignar Mediocampistas
 if num_mid > 0:
     st.subheader("Mediocampistas")
     cols_mid = st.columns(num_mid)
@@ -73,7 +75,7 @@ if num_mid > 0:
             )
             mid_choices.append(choice)
 
-# Sección de Delanteros
+# Asignar Delanteros
 if num_fwd > 0:
     st.subheader("Delanteros")
     cols_fwd = st.columns(num_fwd)
@@ -86,50 +88,77 @@ if num_fwd > 0:
             )
             fwd_choices.append(choice)
 
-# --- Visualización en la Cancha ---
+# Mostrar Arquero y DT fijos
+st.markdown("#### Arquero")
+arquero = all_players["A"][0]
+st.markdown(f"**{arquero}**")
+
+st.markdown("#### DT")
+dt = all_players["DT"][0]
+st.markdown(f"**{dt}**")
+
+# -------------------------------
+# 3. VISUALIZACIÓN EN LA CANCHA
+# -------------------------------
 st.markdown("---")
-st.header("Visualización de la Formación (Estilo FIFA)")
+st.header("Visualización en la Cancha")
 
-def render_row(player_names):
+def get_row_html(players, top):
     """
-    Función para renderizar una fila (línea) de la cancha.
-    Cada jugador se muestra con un puntito y su nombre centrado.
+    Genera HTML para una fila de jugadores en la cancha.
+    :param players: Lista de nombres (se ignoran "(Ninguno)")
+    :param top: Posición vertical en porcentaje (0 a 100)
+    :return: HTML con divs posicionados absolutamente.
     """
-    if player_names:
-        num = len(player_names)
-        row = st.columns(num)
-        for idx, name in enumerate(player_names):
-            with row[idx]:
-                st.markdown(
-                    f"<div style='text-align: center;'>"
-                    f"<div style='font-size: 30px;'>●</div>"
-                    f"<div>{name}</div>"
-                    f"</div>",
-                    unsafe_allow_html=True
-                )
+    html = ""
+    if players:
+        N = len(players)
+        for i, player in enumerate(players):
+            left = (i + 1) / (N + 1) * 100  # Espaciado horizontal en porcentaje
+            if player != "(Ninguno)":
+                html += f'''
+                <div style="position: absolute; top: {top}%; left: {left}%;
+                            transform: translate(-50%, -50%); text-align: center;">
+                    <div style="font-size: 24px;">●</div>
+                    <div style="font-size: 14px;">{player}</div>
+                </div>
+                '''
+    return html
 
-# Visualizamos las líneas en orden inverso (los delanteros en la parte superior)
-if fwd_choices:
-    st.markdown("##### Delanteros")
-    render_row(fwd_choices)
+# Definir posiciones verticales (en porcentaje) para cada línea;
+# se han ajustado para acercarlas un poco más
+top_forwards   = 25   # Delanteros
+top_midfield   = 45   # Mediocampistas
+top_defense    = 65   # Defensas
+top_goalkeeper = 85   # Arquero
 
-if mid_choices:
-    st.markdown("##### Mediocampistas")
-    render_row(mid_choices)
+# Generar HTML para cada línea
+html_forwards = get_row_html(fwd_choices, top_forwards)
+html_midfield = get_row_html(mid_choices, top_midfield)
+html_defense  = get_row_html(defender_choices, top_defense)
+html_goalkeeper = f'''
+<div style="position: absolute; top: {top_goalkeeper}%; left: 50%;
+            transform: translate(-50%, -50%); text-align: center;">
+    <div style="font-size: 24px;">●</div>
+    <div style="font-size: 14px;">{arquero}</div>
+</div>
+'''
 
-if defender_choices:
-    st.markdown("##### Defensas")
-    render_row(defender_choices)
+# Configuración de la cancha
+field_width = 800
+field_height = 600
+# Fondo de cancha (una imagen de un terreno de fútbol)
+field_bg = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Football_pitch.svg/800px-Football_pitch.svg.png"
 
-# Mostrar el arquero fijo al fondo
-st.markdown("##### Arquero")
-st.markdown(
-    f"<div style='text-align: center; font-size: 30px;'>"
-    f"●<div>{all_players['A'][0]}</div></div>",
-    unsafe_allow_html=True
-)
+# Combinar todo en un contenedor con fondo de la cancha
+html_field = f'''
+<div style="position: relative; width: {field_width}px; height: {field_height}px;
+            background-image: url('{field_bg}'); background-size: cover; border: 2px solid #000;">
+    {html_forwards}
+    {html_midfield}
+    {html_defense}
+    {html_goalkeeper}
+</div>
+'''
 
-# Mostrar DT (opcional) fuera del campo
-st.markdown("---")
-st.header("DT")
-st.markdown(f"**{all_players['DT'][0]}**")
+st.markdown(html_field, unsafe_allow_html=True)
