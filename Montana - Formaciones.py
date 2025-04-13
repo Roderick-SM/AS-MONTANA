@@ -61,6 +61,17 @@ if num_mid_izq + num_mid_der + num_mid_def + num_mid_ofen != num_mid:
     st.error("La suma de las subdivisiones de mediocampistas debe ser igual a la cantidad total de mediocampistas.")
     st.stop()
 
+# --- Subdivisión de Defensores ---
+st.markdown("### Subdivisión de Defensores")
+col_def = st.columns(3)
+num_def_central = col_def[0].number_input("Defensa Central", min_value=0, value=num_def, step=1)
+num_def_izq = col_def[1].number_input("Lateral Izquierdo", min_value=0, value=0, step=1)
+num_def_der = col_def[2].number_input("Lateral Derecho", min_value=0, value=0, step=1)
+if num_def_central + num_def_izq + num_def_der != num_def:
+    st.error("La suma de las subdivisiones de defensores debe ser igual al total de defensores.")
+    st.stop()
+
+
 # ------------------------------------------------
 # 3) Selección de jugadores titulares
 # ------------------------------------------------
@@ -83,7 +94,13 @@ def select_players(cat_key, num, key_prefix, label, exclude=[]):
     return choices
 
 exclude_list = [arquero]
-defender_choices = select_players("D", num_def, "def", "Defensores", exclude=exclude_list)
+
+exclude_list = [arquero]
+def_central_choices = select_players("D", num_def_central, "defcent", "Defensa Central", exclude=exclude_list)
+def_izq_choices    = select_players("D", num_def_izq,    "defizq",  "Lateral Izquierdo", exclude=exclude_list)
+def_der_choices    = select_players("D", num_def_der,    "defder",  "Lateral Derecho", exclude=exclude_list)
+
+
 mid_izq_choices  = select_players("M", num_mid_izq, "midizq", "Medio Lateral Izquierdo", exclude=exclude_list)
 mid_der_choices  = select_players("M", num_mid_der, "midder", "Medio Lateral Derecho", exclude=exclude_list)
 mid_def_choices  = select_players("M", num_mid_def, "middef", "Medio Defensivo", exclude=exclude_list)
@@ -136,6 +153,26 @@ def get_player_html(player, top_pct, left_pct, cat):
     </div>
     """
 
+def build_defenders_html(def_central, def_izq, def_der):
+    result = ""
+    if def_central:
+        n = len(def_central)
+        for i, p in enumerate(def_central):
+            left_pct = (i + 1) / (n + 1) * 100
+            result += get_player_html(p, 70, left_pct, "D")
+    if def_izq:
+        n = len(def_izq)
+        for i, p in enumerate(def_izq):
+            left_pct = 20 + (i - (n - 1) / 2) * 10
+            result += get_player_html(p, 70, left_pct, "D")
+    if def_der:
+        n = len(def_der)
+        for i, p in enumerate(def_der):
+            left_pct = 80 + (i - (n - 1) / 2) * 10
+            result += get_player_html(p, 70, left_pct, "D")
+    return result
+
+
 # Función para construir HTML de un subgrupo de mediocampistas
 def build_subgroup_html(players, top_pct, center_x):
     html = ""
@@ -148,29 +185,26 @@ def build_subgroup_html(players, top_pct, center_x):
     return html
 
 # Función para construir todo el HTML de jugadores en cancha
-def build_players_html(gk, defs, mid_izq, mid_der, mid_def, mid_ofen, fwds):
+def build_players_html(gk, def_central, def_izq, def_der, mid_izq, mid_der, mid_def, mid_ofen, fwds):
     result = ""
     # Arquero ~90% (categoria "A")
     if gk:
         result += get_player_html(gk[0], 90, 50, "A")
-    # Defensores ~70% (categoria "D")
-    if defs:
-        n = len(defs)
-        for i, p in enumerate(defs):
-            left_pct = (i + 1) / (n + 1) * 100
-            result += get_player_html(p, 70, left_pct, "D")
+    # Defensores subdivididos:
+    result += build_defenders_html(def_central, def_izq, def_der)
     # Mediocampistas subdivididos:
     result += build_subgroup_html(mid_izq, 50, 25)
     result += build_subgroup_html(mid_der, 50, 75)
     result += build_subgroup_html(mid_def, 60, 50)
     result += build_subgroup_html(mid_ofen, 40, 50)
-    # Delanteros ~30% (categoria "F")
+    # Delanteros ~25% (categoria "F")
     if fwds:
         n = len(fwds)
         for i, p in enumerate(fwds):
             left_pct = (i + 1) / (n + 1) * 100
             result += get_player_html(p, 25, left_pct, "F")
     return result
+
 
 players_html = build_players_html([arquero], defender_choices, mid_izq_choices, mid_der_choices, mid_def_choices, mid_ofen_choices, fwd_choices)
 
