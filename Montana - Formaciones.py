@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
-st.write("### Versión Final - Círculos por Posición + Suplentes Integrados + Fondo Gris")
+st.write("### Versión Final - Opción 2 + Área Penal Vertical Reducida")
 
 # ------------------------------------------------
 # 1) Datos de jugadores
@@ -15,28 +15,28 @@ all_players = {
     "DT": ["Diego"],
 }
 
-# Paleta de colores para cada posición
-# Lo podés cambiar a gusto
+# Paleta de colores según opción 2:
+# Arquero: azul brillante, Defensas: rojo fuerte, Mediocampistas: verde, Delanteros: ámbar
 category_colors = {
-    "A": "#28a745",  # Verde para arquero
-    "D": "#dc3545",  # Rojo para defensores
-    "M": "#ffc107",  # Amarillo-anaranjado para mediocampistas
-    "F": "#007bff",  # Azul para delanteros
+    "A": "#007bff",  # Azul brillante
+    "D": "#dc3545",  # Rojo fuerte
+    "M": "#28a745",  # Verde
+    "F": "#ffc107",  # Ámbar
 }
 
 def get_player_category(player):
-    """Devuelve la categoría (A, D, M, F) para un jugador dado."""
+    """Devuelve la categoría (A, D, M, F) a la que pertenece un jugador."""
     for cat in ["A", "D", "M", "F"]:
         if player in all_players[cat]:
             return cat
     return None
 
 def get_player_color(player):
-    """Devuelve el color de fondo para el jugador según su categoría."""
+    """Devuelve el color según la posición del jugador."""
     cat = get_player_category(player)
     if cat and cat in category_colors:
         return category_colors[cat]
-    return "#ffffff"  # blanco por si no encuentra la categoría
+    return "#ffffff"  # blanco si no encuentra la categoría
 
 # ------------------------------------------------
 # 2) Configuración de la formación
@@ -74,22 +74,17 @@ st.header("Asignación de Jugadores en la Cancha")
 arquero = st.selectbox("Elegí el arquero", all_players["A"])
 
 def select_players(cat_key, num, key_prefix, label, exclude=[]):
-    """Devuelve la lista de jugadores elegidos en esa categoría."""
     choices = []
     if num > 0:
         st.subheader(f"{label} (en cancha)")
         cols = st.columns(num)
         for i in range(num):
-            available = ["(Ninguno)"] + [
-                p for p in all_players[cat_key]
-                if p not in choices and p not in exclude
-            ]
+            available = ["(Ninguno)"] + [p for p in all_players[cat_key] if p not in choices and p not in exclude]
             with cols[i]:
                 sel = st.selectbox(f"{label} {i+1}", available, key=f"{key_prefix}_{i}")
             choices.append(sel)
     return choices
 
-# Excluir al arquero elegido de otras líneas
 exclude_list = [arquero]
 defender_choices = select_players("D", num_def, "def", "Defensores", exclude=exclude_list)
 mid_choices = select_players("M", num_mid, "mid", "Mediocampistas", exclude=exclude_list)
@@ -101,20 +96,11 @@ fwd_choices = select_players("F", num_fwd, "fwd", "Delanteros", exclude=exclude_
 st.markdown("---")
 st.header("Suplentes y Reservas")
 
-suplentes_def = st.multiselect("Suplentes - Defensa:", options=[
-    p for p in all_players["D"] if p not in defender_choices and p != arquero
-])
-suplentes_mid = st.multiselect("Suplentes - Medio:", options=[
-    p for p in all_players["M"] if p not in mid_choices and p != arquero
-])
-suplentes_fwd = st.multiselect("Suplentes - Delanteros:", options=[
-    p for p in all_players["F"] if p not in fwd_choices and p != arquero
-])
+suplentes_def = st.multiselect("Suplentes - Defensa:", options=[p for p in all_players["D"] if p not in defender_choices and p != arquero])
+suplentes_mid = st.multiselect("Suplentes - Medio:", options=[p for p in all_players["M"] if p not in mid_choices and p != arquero])
+suplentes_fwd = st.multiselect("Suplentes - Delanteros:", options=[p for p in all_players["F"] if p not in fwd_choices and p != arquero])
 
-used = set(
-    defender_choices + mid_choices + fwd_choices +
-    suplentes_def + suplentes_mid + suplentes_fwd + [arquero]
-)
+used = set(defender_choices + mid_choices + fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd + [arquero])
 all_outfield = set(all_players["D"] + all_players["M"] + all_players["F"])
 reservas = sorted(list(all_outfield - used))
 
@@ -127,16 +113,13 @@ else:
     st.write("Ninguna")
 
 # ------------------------------------------------
-# 5) Construcción del "canvas" con cancha + suplentes
+# 5) Construcción del canvas con cancha y suplentes integrados
 # ------------------------------------------------
-
 def get_player_html(player, top_pct, left_pct):
-    """ Devuelve el HTML de un jugador con círculo triple borde y color por posición. """
+    """Devuelve el HTML de un jugador con círculos triple borde según posición."""
     if player == "(Ninguno)":
         return ""
     circle_color = get_player_color(player)
-    # Círculo con triple borde: color base, anillo blanco, anillo negro
-    # Se hace con: border: 2px solid #fff (borde blanco) + box-shadow: 0 0 0 2px #000 (borde negro)
     return f"""
     <div style="position: absolute; top: {top_pct}%; left: {left_pct}%;
                 transform: translate(-50%, -50%); text-align: center;">
@@ -155,12 +138,10 @@ def get_player_html(player, top_pct, left_pct):
     """
 
 def build_players_html(gk, defs, meds, fwds):
-    """ Construye todo el HTML para los jugadores en sus posiciones (vertical). """
     result = ""
-    # Arquero ~ 90%, Defs ~70%, Meds ~50%, Fwds ~30% (ajustable)
-    # Distribución horizontal según cuántos jugadores haya en cada línea
+    # Posiciones verticales: Arquero ~90%, Defensas ~70%, Mediocampistas ~50%, Delanteros ~30%
     if gk:
-        result += get_player_html(gk[0], 90, 50)  # 1 arquero centrado
+        result += get_player_html(gk[0], 90, 50)
     if defs:
         n = len(defs)
         for i, p in enumerate(defs):
@@ -181,9 +162,8 @@ def build_players_html(gk, defs, meds, fwds):
 players_html = build_players_html([arquero], defender_choices, mid_choices, fwd_choices)
 
 # -------------------
-# a) Cancha con "stripes" de fondo
+# a) Cancha (lado izquierdo, 400x600) con fondo "stripes"
 # -------------------
-# Podés cambiar '40px' o colores para otras franjas
 field_html = f"""
 <div style="position: absolute; left: 0; top: 0; width: 400px; height: 600px;
             background: repeating-linear-gradient(
@@ -194,7 +174,7 @@ field_html = f"""
                 #24913c 80px
             );
             border-right: 2px solid #000; box-sizing: border-box;">
-
+    
     <!-- Línea de medio campo -->
     <div style="position: absolute; top: 0px; left: 0; width: 100%; height: 2px; background: white;"></div>
     
@@ -220,8 +200,8 @@ field_html = f"""
     <!-- Arco -->
     <div style="position: absolute; left: 160px; top: 598px; width: 80px; height: 8px; border: 2px solid white;"></div>
     
-    <!-- Área penal (más larga) -->
-    <div style="position: absolute; left: 60px; top: 460px; width: 280px; height: 140px; border: 2px solid white;"></div>
+    <!-- Área penal (más larga, con menor altura) -->
+    <div style="position: absolute; left: 60px; top: 460px; width: 280px; height: 120px; border: 2px solid white;"></div>
     
     <!-- Área chica -->
     <div style="position: absolute; left: 160px; top: 540px; width: 80px; height: 60px; border: 2px solid white;"></div>
@@ -239,7 +219,7 @@ field_html = f"""
 """
 
 # -------------------
-# b) Panel de suplentes (fondo gris)
+# b) Panel de suplentes (lado derecho, 150x600, con fondo gris)
 # -------------------
 suplentes_html = "<div style='position: absolute; right: 0; top: 0; width: 150px; height: 600px; "
 suplentes_html += "background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 14px;'>"
@@ -266,12 +246,11 @@ if suplentes_fwd:
 else:
     suplentes_html += "<div><strong>Delanteros:</strong> Ninguno</div>"
 
-# DT
 suplentes_html += f"<br><div><strong>DT:</strong> {all_players['DT'][0]}</div>"
 suplentes_html += "</div>"
 
 # -------------------
-# c) Contenedor global (ancho: 400 + 150 = 550px)
+# c) Contenedor global (ancho total: 400+150 = 550px)
 # -------------------
 overall_html = f"""
 <div style="position: relative; width: 550px; height: 600px; border: 2px solid #000; margin-bottom: 20px;">
@@ -280,6 +259,5 @@ overall_html = f"""
 </div>
 """
 
-# Renderizamos todo como un solo bloque
 st.subheader("Visualización Completa")
 components.html(overall_html, height=620)
