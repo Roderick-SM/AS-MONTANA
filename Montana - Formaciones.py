@@ -11,7 +11,7 @@ all_players = {
 }
 
 st.set_page_config(layout="wide")
-st.title("⚽ Organizador de Formaciones - Cancha Verde + Suplentes + DT")
+st.title("⚽ Organizador de Formaciones - Cancha Verde con Líneas + Suplentes + DT")
 
 # -------------------------------------------------
 # 1) CONFIGURACIÓN DE LA FORMACIÓN
@@ -108,7 +108,7 @@ with col_cancha:
         """
         Genera HTML para una fila de jugadores en la cancha.
         :param players: Lista de nombres (se ignoran "(Ninguno)")
-        :param top: Posición vertical en porcentaje (0 a 100)
+        :param top: Posición vertical (en porcentaje del alto)
         :return: HTML con divs posicionados absolutamente.
         """
         html = ""
@@ -120,7 +120,7 @@ with col_cancha:
                 html += f'''
                 <div style="position: absolute; top: {top}%; left: {left}%;
                             transform: translate(-50%, -50%); text-align: center;">
-                    <div style="font-size: 36px; line-height: 32px;">●</div>
+                    <div style="font-size: 36px; line-height: 32px; color: #fff;">●</div>
                     <div style="font-size: 20px; font-weight: bold; color: #fff;">{player}</div>
                 </div>
                 '''
@@ -138,26 +138,24 @@ with col_cancha:
     html_goalkeeper = f"""
     <div style="position: absolute; top: {top_goalkeeper}%; left: 50%;
                 transform: translate(-50%, -50%); text-align: center;">
-        <div style="font-size: 36px; line-height: 32px;">●</div>
+        <div style="font-size: 36px; line-height: 32px; color: #fff;">●</div>
         <div style="font-size: 20px; font-weight: bold; color: #fff;">{arquero}</div>
     </div>
     """
 
-    # Configuración de la cancha: usamos un SVG de futbol de Wikipedia
+    # Configuración de la cancha: se simula un campo con degradado y elementos para líneas centrales y círculo.
     field_width = 800
     field_height = 550
-    # Fondo: cancha verde con líneas (SVG)
-    field_bg = "https://upload.wikimedia.org/wikipedia/commons/4/47/Football_pitch.svg"
 
-    # Contenedor HTML con color de fondo verde como respaldo y la imagen con las líneas
     html_field = f"""
     <div style="position: relative; width: {field_width}px; height: {field_height}px;
-                background-color: #1e7d36;
-                background-image: url('{field_bg}');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-size: contain;
+                background: linear-gradient(to right, #7FCB7F 50%, #B1D7A3 50%);
                 border: 2px solid #000; margin-bottom: 20px;">
+        <!-- Línea vertical central -->
+        <div style="position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: white;"></div>
+        <!-- Círculo central -->
+        <div style="position: absolute; left: 50%; top: 50%; width: 80px; height: 80px; margin-left: -40px; margin-top: -40px;
+                    border: 2px solid white; border-radius: 50%;"></div>
         {html_forwards}
         {html_midfield}
         {html_defense}
