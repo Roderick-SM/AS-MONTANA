@@ -71,7 +71,7 @@ if num_mid_izq + num_mid_der + num_mid_def + num_mid_ofen != num_mid:
     st.error("La suma de las subdivisiones de mediocampistas debe ser igual a la cantidad total de mediocampistas.")
     st.stop()
 
-# Agregamos una opción de escala para mejorar la visualización
+# Agregamos una opción de escala para mejorar la visualización en celular
 scale = st.slider("Escala de visualización", min_value=1.0, max_value=2.0, value=1.0, step=0.1)
 field_width = int(400 * scale)
 field_height = int(600 * scale)
@@ -123,7 +123,7 @@ suplentes_mid = st.multiselect("Suplentes - Medio:",
 suplentes_fwd = st.multiselect("Suplentes - Delanteros:", 
     options=[p for p in all_players["F"] if p not in fwd_choices and p != arquero])
 
-# Se eliminó la lista de reservas
+# Se eliminó la sección de reservas (ya no se imprime)
 
 # ------------------------------------------------
 # 5) Construcción del canvas con cancha y suplentes integrados
@@ -185,7 +185,7 @@ def build_players_html(gk, def_cent, def_izq, def_der, mid_izq, mid_der, mid_def
     result = ""
     # Arquero ~90% (categoria "A")
     if gk:
-        result += get_player_html(gk[0], 90, field_width//2, "A")
+        result += get_player_html(gk[0], 90, 50, "A")
     # Defensores subdivididos:
     result += build_defenders_html(def_cent, def_izq, def_der)
     # Mediocampistas subdivididos:
@@ -214,7 +214,7 @@ players_html = build_players_html(
 )
 
 # -------------------
-# a) Cancha (lado izquierdo, con escala aplicada)
+# a) Cancha (lado izquierdo, scale aplicado)
 # -------------------
 field_html = f"""
 <div style="position: absolute; left: 0; top: 0; width: {field_width}px; height: {field_height}px;
@@ -272,7 +272,7 @@ field_html = f"""
 """
 
 # -------------------
-# b) Panel de suplentes (lado derecho, con escala aplicada)
+# b) Panel de suplentes (lado derecho, con escala aplicada y sin reservas)
 # Orden: Delanteros, Medio, Defensa; DT y formación final.
 # -------------------
 suplentes_html = f"<div style='position: absolute; right: 0; top: 0; width: {suplentes_width}px; height: {field_height}px; background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
@@ -298,10 +298,10 @@ suplentes_html += "<div style='margin-top: 20px; text-align: center; font-size: 
 suplentes_html += "</div>"
 
 # -------------------
-# c) Contenedor global (ancho total: field_width + suplentes_width, con width 100% para ajuste)
+# c) Contenedor global (ancho total: field_width + suplentes_width, height: field_height)
 # -------------------
 overall_html = f"""
-<div style="position: relative; width: 100%; max-width: {overall_width}px; height: {field_height}px; margin: auto; border: 2px solid #000; margin-bottom: 20px;">
+<div style="position: relative; width: {overall_width}px; height: {field_height}px; border: 2px solid #000; margin-bottom: 20px;">
     {field_html}
     {suplentes_html}
 </div>
