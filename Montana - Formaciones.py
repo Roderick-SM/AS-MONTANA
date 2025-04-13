@@ -236,7 +236,7 @@ field_html = f"""
 # Orden: Delanteros, Medio, Defensa; DT más abajo.
 # -------------------
 suplentes_html = "<div style='position: absolute; right: 0; top: 0; width: 150px; height: 600px; "
-suplentes_html += "background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 16px;'>"
+suplentes_html += "background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
 suplentes_html += "<div style='text-align: center; font-weight: bold; margin-bottom: 10px;'>Suplentes</div>"
 
 if suplentes_fwd:
@@ -256,7 +256,7 @@ else:
 
 suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>DT:</strong> " + all_players['DT'][0] + "</div>"
 
-suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>Formación elegida:</strong> " + {formation_str} + "</div>"
+suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>Formación elegida:</strong> " + formation_str + "</div>"
 
 suplentes_html += "</div>"
 
