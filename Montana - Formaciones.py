@@ -123,12 +123,12 @@ all_outfield = set(all_players["D"] + all_players["M"] + all_players["F"])
 reservas = sorted(list(all_outfield - used))
 
 st.markdown("---")
-st.subheader("Reservas")
-if reservas:
-    for r in reservas:
-        st.write("- " + r)
-else:
-    st.write("Ninguna")
+# st.subheader("Reservas")
+# if reservas:
+#     for r in reservas:
+#         st.write("- " + r)
+# else:
+#     st.write("Ninguna")
 
 # ------------------------------------------------
 # 5) Construcción del canvas con cancha y suplentes integrados
