@@ -1,9 +1,9 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Configuración
+# Configuración inicial
 st.set_page_config(layout="wide")
-st.write("### Versión 3.4 - Círculo Central Corregido + Suplentes Más Cercanos")
+st.write("### Versión Final - Jugadores con Marker Mejorado + Lista de Suplentes Pegada a la Cancha")
 
 # ---------------------------
 # Datos de jugadores
@@ -97,9 +97,9 @@ with col_suplentes:
         st.write("Ninguna")
 
 # ---------------------------
-# Visualización de la cancha
+# Visualización de la cancha y lista de suplentes juntos
 # ---------------------------
-col_field, col_lista = st.columns([4, 1])
+col_field, col_lista = st.columns([4, 0.5])
 with col_field:
     st.header("AS MONTANA - SQUAD")
 
@@ -113,8 +113,9 @@ with col_field:
                 html += f"""
                 <div style="position: absolute; top: {top_pct}%; left: {left_pct}%;
                             transform: translate(-50%, -50%); text-align: center;">
-                    <div style="font-size: 24px; color: #fff;">●</div>
-                    <div style="font-size: 16px; font-weight: bold; color: #fff;">{player}</div>
+                    <div style="font-size: 32px; color: #000;">●</div>
+                    <div style="background-color: #000; color: #fff; font-size: 18px; font-weight: bold;
+                                padding: 2px 4px; border-radius: 4px; margin-top: 2px;">{player}</div>
                 </div>
                 """
         return html
@@ -140,15 +141,14 @@ with col_field:
                     background: white; border-radius: 50%;
                     transform: translate(-50%, 50%);"></div>
 
-
-        <!-- Semicírculo central inferior (CORREGIDO) -->
+        <!-- Semicírculo central inferior (CORREGIDO: pegado a la línea de medio campo) -->
         <div style="
             position: absolute; top: -60px; left: 200px;
             width: 120px; height: 120px;
             margin-left: -60px;
             border: 2px solid #fff;
             border-radius: 50%;
-            clip-path: inset(60px 0 0 0);  /* muestra solo la mitad inferior */
+            clip-path: inset(60px 0 0 0);
         "></div>
 
         <!-- Línea de gol -->
@@ -180,12 +180,9 @@ with col_field:
 
     components.html(field_html, height=field_height + 20)
 
-# ---------------------------
-# Lista de suplentes con DT
-# ---------------------------
 with col_lista:
     st.header("Suplentes")
-    supl_html = "<div style='background-color: #333; color: #fff; padding: 10px; border-radius: 5px;'>"
+    supl_html = "<div style='background-color: #333; color: #fff; padding: 10px; border-radius: 5px; margin: 0;'>"
     supl_html += "<h3 style='margin-top:0;'>Suplentes</h3>"
 
     if suplentes_def:
