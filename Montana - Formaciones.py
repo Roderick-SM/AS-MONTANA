@@ -1,15 +1,15 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Configuración inicial
+# Configuración
 st.set_page_config(layout="wide")
-st.write("### Versión 3.1 - Cancha Corregida Visualmente")
+st.write("### Versión 3.2 - Área Extendida + Círculo Central + Arqueros elegibles")
 
 # ---------------------------
 # Datos de jugadores
 # ---------------------------
 all_players = {
-    "A": ["Axel"],
+    "A": ["Axel", "Alex", "Gonza"],  # ahora se puede elegir entre varios arqueros
     "D": ["David", "Manu", "Joaco", "Sebastian", "Ale", "Gaston", "Marius", "Rodri A"],
     "M": ["Pedro", "Juan Colombia", "Alex", "Gonza", "Lauti", "Bash", "Nico", "Rodri P"],
     "F": ["Rodri SM", "Fer", "Parga", "Matheus", "Paco"],
@@ -51,27 +51,26 @@ st.markdown(f"**Formación elegida:** `{formation_str}`")
 st.markdown("---")
 st.header("Asignación de Jugadores en la Cancha")
 
-def select_players(cat_key, num, key_prefix, label):
+arquero = st.selectbox("Elegí el arquero", all_players["A"])
+
+def select_players(cat_key, num, key_prefix, label, exclude=[]):
     choices = []
     if num > 0:
         st.subheader(f"{label} (en cancha)")
         cols = st.columns(num)
         for i in range(num):
-            available = ["(Ninguno)"] + [p for p in all_players[cat_key] if p not in choices]
+            available = ["(Ninguno)"] + [p for p in all_players[cat_key] if p not in choices and p not in exclude]
             with cols[i]:
                 sel = st.selectbox(f"{label} {i+1}", available, key=f"{key_prefix}_{i}")
             choices.append(sel)
     return choices
 
-defender_choices = select_players("D", num_def, "def", "Defensores")
-mid_choices = select_players("M", num_mid, "mid", "Mediocampistas")
-fwd_choices = select_players("F", num_fwd, "fwd", "Delanteros")
+# Excluir al arquero de las otras líneas
+exclude_list = [arquero]
 
-arquero = all_players["A"][0]
-dt = all_players["DT"][0]
-
-st.markdown("#### Arquero")
-st.write(f"**{arquero}**")
+defender_choices = select_players("D", num_def, "def", "Defensores", exclude=exclude_list)
+mid_choices = select_players("M", num_mid, "mid", "Mediocampistas", exclude=exclude_list)
+fwd_choices = select_players("F", num_fwd, "fwd", "Delanteros", exclude=exclude_list)
 
 # ---------------------------
 # Suplentes y reservas
@@ -82,11 +81,11 @@ st.header("Suplentes y Reservas")
 col_dummy, col_suplentes = st.columns([2,1])
 with col_suplentes:
     st.subheader("Suplentes")
-    suplentes_def = st.multiselect("Defensa:", options=[p for p in all_players["D"] if p not in defender_choices])
-    suplentes_mid = st.multiselect("Medio:", options=[p for p in all_players["M"] if p not in mid_choices])
-    suplentes_fwd = st.multiselect("Delanteros:", options=[p for p in all_players["F"] if p not in fwd_choices])
+    suplentes_def = st.multiselect("Defensa:", options=[p for p in all_players["D"] if p not in defender_choices and p != arquero])
+    suplentes_mid = st.multiselect("Medio:", options=[p for p in all_players["M"] if p not in mid_choices and p != arquero])
+    suplentes_fwd = st.multiselect("Delanteros:", options=[p for p in all_players["F"] if p not in fwd_choices and p != arquero])
 
-    used = set(defender_choices + mid_choices + fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd)
+    used = set(defender_choices + mid_choices + fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd + [arquero])
     all_outfield = set(all_players["D"] + all_players["M"] + all_players["F"])
     reservas = sorted(list(all_outfield - used))
 
@@ -121,7 +120,7 @@ with col_field:
                 """
         return html
 
-    # Posiciones verticales corregidas
+    # Posiciones verticales
     html_gk  = get_row_html([arquero], 90)
     html_def = get_row_html(defender_choices, 70)
     html_mid = get_row_html(mid_choices, 50)
@@ -134,41 +133,46 @@ with col_field:
     <div style="position: relative; width: {field_width}px; height: {field_height}px;
                 background-color: #1e7d36; border: 2px solid #000;">
         
-        <!-- Línea media (arriba) -->
+        <!-- Línea de medio campo -->
         <div style="position: absolute; top: 0px; left: 0; width: 100%; height: 2px; background: white;"></div>
+        
+        <!-- Punto central -->
+        <div style="
+            position: absolute; top: 0px; left: 200px;
+            width: 6px; height: 6px; 
+            background: white; border-radius: 50%;
+            transform: translate(-50%, 50%);
+        "></div>
+
+        <!-- Semicírculo central (inferior) -->
+        <div style="
+            position: absolute; left: 200px; top: 0px;
+            width: 120px; height: 120px;
+            margin-left: -60px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            clip-path: inset(60px 0 0 0);
+        "></div>
 
         <!-- Línea de gol -->
         <div style="position: absolute; top: 598px; left: 0; width: 100%; height: 2px; background: white;"></div>
 
         <!-- Arco -->
-        <div style="
-            position: absolute; left: 160px; top: 598px; 
-            width: 80px; height: 8px;
-            border: 2px solid white;
-        "></div>
+        <div style="position: absolute; left: 160px; top: 598px; width: 80px; height: 8px; border: 2px solid white;"></div>
 
-        <!-- Área penal -->
-        <div style="
-            position: absolute; left: 100px; top: 460px;
-            width: 200px; height: 140px;
-            border: 2px solid #fff;
-        "></div>
+        <!-- Área penal (más ancha) -->
+        <div style="position: absolute; left: 80px; top: 460px; width: 240px; height: 140px; border: 2px solid white;"></div>
 
         <!-- Área chica -->
-        <div style="
-            position: absolute; left: 160px; top: 540px;
-            width: 80px; height: 60px;
-            border: 2px solid #fff;
-        "></div>
+        <div style="position: absolute; left: 160px; top: 540px; width: 80px; height: 60px; border: 2px solid white;"></div>
 
-        <!-- Semicírculo penal -->
+        <!-- Semicírculo penal (frente al área) -->
         <div style="
             position: absolute; left: 200px; top: 460px;
             width: 120px; height: 120px;
             margin-left: -60px; margin-top: -60px;
             border: 2px solid #fff;
             border-radius: 50%;
-            background: none;
             clip-path: inset(0 0 60px 0);
         "></div>
 
@@ -182,7 +186,7 @@ with col_field:
     components.html(field_html, height=field_height + 20)
 
 # ---------------------------
-# Lista de suplentes (con DT)
+# Lista de suplentes con DT
 # ---------------------------
 with col_lista:
     st.header("Suplentes")
@@ -204,5 +208,5 @@ with col_lista:
     else:
         supl_html += "<strong>Delanteros:</strong> <em>Ninguno</em><br>"
 
-    supl_html += f"<br><strong>DT:</strong> {dt}</div>"
+    supl_html += f"<br><strong>DT:</strong> {all_players['DT'][0]}</div>"
     st.markdown(supl_html, unsafe_allow_html=True)
