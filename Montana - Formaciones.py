@@ -44,8 +44,6 @@ if (num_def + num_mid + num_fwd) != num_players:
 st.markdown("---")
 st.header("Asignación de Jugadores en la Cancha")
 
-# Función para seleccionar jugadores de una categoría,
-# evitando que se repitan en la misma categoría.
 def select_players(cat_key, num, key_prefix, label):
     choices = []
     if num > 0:
@@ -58,7 +56,7 @@ def select_players(cat_key, num, key_prefix, label):
             choices.append(sel)
     return choices
 
-# Para cada categoría se usa la clave del diccionario y se muestra el nombre completo.
+# Usamos nombres completos para los títulos.
 defender_choices = select_players("D", num_def, "def", "Defensores")
 mid_choices      = select_players("M", num_mid, "mid", "Mediocampistas")
 fwd_choices      = select_players("F", num_fwd, "fwd", "Delanteros")
@@ -77,11 +75,6 @@ st.write(f"**{dt}**")
 st.markdown("---")
 st.header("Visualización en la Cancha")
 
-# En esta versión, la cancha se muestra verticalmente:
-# - Delanteros en la parte superior
-# - Mediocampistas en el centro
-# - Defensores debajo
-# - Arquero al final
 def get_row_html(players, top_pct):
     """Genera HTML para una fila de jugadores, distribuidos horizontalmente."""
     html = ""
@@ -99,16 +92,16 @@ def get_row_html(players, top_pct):
             """
     return html
 
-# Definir la posición vertical para cada línea (porcentaje del alto del contenedor)
-top_delanteros   = 20   # Delanteros arriba
-top_mediocampistas = 45 # Mediocampistas en el centro
-top_defensores   = 70   # Defensores debajo
-top_arquero      = 90   # Arquero al final
+# Definir posiciones verticales (en porcentajes del contenedor)
+top_delanteros       = 20   # Delanteros (parte superior)
+top_mediocampistas   = 45   # Mediocampistas (centro)
+top_defensores       = 70   # Defensores (más abajo)
+top_arquero          = 90   # Arquero (cerca del fondo)
 
-html_delanteros = get_row_html(fwd_choices, top_delanteros)
-html_mediocampistas = get_row_html(mid_choices, top_mediocampistas)
-html_defensores = get_row_html(defender_choices, top_defensores)
-html_arquero = f"""
+html_delanteros       = get_row_html(fwd_choices, top_delanteros)
+html_mediocampistas   = get_row_html(mid_choices, top_mediocampistas)
+html_defensores       = get_row_html(defender_choices, top_defensores)
+html_arquero          = f"""
 <div style="position: absolute; top: {top_arquero}%; left: 50%;
             transform: translate(-50%, -50%); text-align: center;">
     <div style="font-size: 36px; color: #fff;">●</div>
@@ -116,7 +109,7 @@ html_arquero = f"""
 </div>
 """
 
-# Contenedor de la cancha: fondo verde uniforme con línea central horizontal y círculo central
+# Contenedor de la cancha: fondo verde uniforme con línea central horizontal y círculo central.
 field_width = 800
 field_height = 550
 
@@ -126,8 +119,8 @@ html_field = f"""
     <!-- Línea central horizontal -->
     <div style="position: absolute; top: {field_height/2}px; left: 0; width: 100%; height: 2px; background: white;"></div>
     <!-- Círculo central -->
-    <div style="position: absolute; left: 50%; top: 50%; width: 80px; height: 80px;
-         margin-left: -40px; margin-top: -40px; border: 2px solid white; border-radius: 50%;"></div>
+    <div style="position: absolute; left: 50%; top: 50%; width: 80px; height: 80px; margin-left: -40px; margin-top: -40px;
+         border: 2px solid white; border-radius: 50%;"></div>
     {html_delanteros}
     {html_mediocampistas}
     {html_defensores}
@@ -143,12 +136,10 @@ components.html(html_field, height=field_height + 40)
 st.markdown("---")
 st.header("Suplentes y Reservas")
 
-# Definimos una columna más estrecha a la derecha para los suplentes.
 col_dummy, col_banco = st.columns([2, 1])
 
 with col_banco:
     st.subheader("Suplentes")
-    # Para cada categoría se muestra la lista de opciones que no se usaron en la cancha.
     suplentes_def = st.multiselect(
         "Defensa:",
         options=[p for p in all_players["D"] if p not in defender_choices]
@@ -161,13 +152,11 @@ with col_banco:
         "Delanteros:",
         options=[p for p in all_players["F"] if p not in fwd_choices]
     )
-    
     st.markdown("**DT**")
     st.write(dt)
     
     st.markdown("---")
     st.subheader("Reservas")
-    # Se consideran como reservas a los jugadores del outfield que no estén en la cancha ni elegidos como suplentes.
     usados = set(defender_choices + mid_choices + fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd)
     all_outfield = set(all_players["D"] + all_players["M"] + all_players["F"])
     reservas = sorted(list(all_outfield - usados))
