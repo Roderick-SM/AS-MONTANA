@@ -1,13 +1,13 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Configuración de la página
+# Configuración inicial
 st.set_page_config(layout="wide")
-st.write("### Versión 3.0 - Campo Vertical Corregido + Detalles Mejorados")
+st.write("### Versión 3.1 - Cancha Corregida Visualmente")
 
-# ----------------------------------------
-# 1. DATOS DE JUGADORES
-# ----------------------------------------
+# ---------------------------
+# Datos de jugadores
+# ---------------------------
 all_players = {
     "A": ["Axel"],
     "D": ["David", "Manu", "Joaco", "Sebastian", "Ale", "Gaston", "Marius", "Rodri A"],
@@ -18,9 +18,9 @@ all_players = {
 
 st.title("AS Montana - Squad")
 
-# ----------------------------------------
-# 2. CONFIGURACIÓN DE LA FORMACIÓN
-# ----------------------------------------
+# ---------------------------
+# Configuración de formación
+# ---------------------------
 st.header("Configuración de la Formación")
 
 total_players = st.number_input(
@@ -42,13 +42,12 @@ if (num_def + num_mid + num_fwd) != num_field_players:
     st.error(f"La suma (Defensores + Mediocampistas + Delanteros) debe ser igual a {num_field_players}.")
     st.stop()
 
-# Mostrar formación elegida tipo "2-3-2"
 formation_str = f"{num_def}-{num_mid}-{num_fwd}"
 st.markdown(f"**Formación elegida:** `{formation_str}`")
 
-# ----------------------------------------
-# 3. ASIGNACIÓN DE JUGADORES TITULARES
-# ----------------------------------------
+# ---------------------------
+# Selección de titulares
+# ---------------------------
 st.markdown("---")
 st.header("Asignación de Jugadores en la Cancha")
 
@@ -65,8 +64,8 @@ def select_players(cat_key, num, key_prefix, label):
     return choices
 
 defender_choices = select_players("D", num_def, "def", "Defensores")
-mid_choices      = select_players("M", num_mid, "mid", "Mediocampistas")
-fwd_choices      = select_players("F", num_fwd, "fwd", "Delanteros")
+mid_choices = select_players("M", num_mid, "mid", "Mediocampistas")
+fwd_choices = select_players("F", num_fwd, "fwd", "Delanteros")
 
 arquero = all_players["A"][0]
 dt = all_players["DT"][0]
@@ -74,30 +73,18 @@ dt = all_players["DT"][0]
 st.markdown("#### Arquero")
 st.write(f"**{arquero}**")
 
-st.markdown("#### DT")
-st.write(f"**{dt}**")
-
-# ----------------------------------------
-# 4. SUPLENTES Y RESERVAS
-# ----------------------------------------
+# ---------------------------
+# Suplentes y reservas
+# ---------------------------
 st.markdown("---")
 st.header("Suplentes y Reservas")
 
 col_dummy, col_suplentes = st.columns([2,1])
 with col_suplentes:
     st.subheader("Suplentes")
-    suplentes_def = st.multiselect(
-        "Defensa:", options=[p for p in all_players["D"] if p not in defender_choices]
-    )
-    suplentes_mid = st.multiselect(
-        "Medio:", options=[p for p in all_players["M"] if p not in mid_choices]
-    )
-    suplentes_fwd = st.multiselect(
-        "Delanteros:", options=[p for p in all_players["F"] if p not in fwd_choices]
-    )
-
-    st.markdown("**DT:**")
-    st.write(dt)
+    suplentes_def = st.multiselect("Defensa:", options=[p for p in all_players["D"] if p not in defender_choices])
+    suplentes_mid = st.multiselect("Medio:", options=[p for p in all_players["M"] if p not in mid_choices])
+    suplentes_fwd = st.multiselect("Delanteros:", options=[p for p in all_players["F"] if p not in fwd_choices])
 
     used = set(defender_choices + mid_choices + fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd)
     all_outfield = set(all_players["D"] + all_players["M"] + all_players["F"])
@@ -111,9 +98,9 @@ with col_suplentes:
     else:
         st.write("Ninguna")
 
-# ----------------------------------------
-# 5. VISUALIZACIÓN DE LA CANCHA (VERTICAL DE ABAJO HACIA ARRIBA)
-# ----------------------------------------
+# ---------------------------
+# Visualización de la cancha
+# ---------------------------
 col_field, col_lista = st.columns([3,2])
 with col_field:
     st.header("AS MONTANA - SQUAD")
@@ -134,11 +121,11 @@ with col_field:
                 """
         return html
 
-    # Invertimos las alturas para que el campo se vea desde abajo hacia arriba
-    html_gk  = get_row_html([arquero], 85)
-    html_def = get_row_html(defender_choices, 65)
-    html_mid = get_row_html(mid_choices, 45)
-    html_fwd = get_row_html(fwd_choices, 25)
+    # Posiciones verticales corregidas
+    html_gk  = get_row_html([arquero], 90)
+    html_def = get_row_html(defender_choices, 70)
+    html_mid = get_row_html(mid_choices, 50)
+    html_fwd = get_row_html(fwd_choices, 30)
 
     field_width = 400
     field_height = 600
@@ -147,52 +134,42 @@ with col_field:
     <div style="position: relative; width: {field_width}px; height: {field_height}px;
                 background-color: #1e7d36; border: 2px solid #000;">
         
-        <!-- Línea de gol (abajo) -->
-        <div style="position: absolute; left: 0px; top: 598px;
-                    width: 100%; height: 2px; background: white;"></div>
-                    
-        <!-- Línea de medio campo (arriba) -->
-        <div style="position: absolute; left: 0px; top: 0px;
-                    width: 100%; height: 2px; background: white;"></div>
-        
+        <!-- Línea media (arriba) -->
+        <div style="position: absolute; top: 0px; left: 0; width: 100%; height: 2px; background: white;"></div>
+
+        <!-- Línea de gol -->
+        <div style="position: absolute; top: 598px; left: 0; width: 100%; height: 2px; background: white;"></div>
+
         <!-- Arco -->
         <div style="
             position: absolute; left: 160px; top: 598px; 
-            width: 80px; height: 8px; 
+            width: 80px; height: 8px;
             border: 2px solid white;
         "></div>
 
         <!-- Área penal -->
         <div style="
-            position: absolute; left: 100px; top: 420px; 
-            width: 200px; height: 180px; 
+            position: absolute; left: 100px; top: 460px;
+            width: 200px; height: 140px;
             border: 2px solid #fff;
         "></div>
 
         <!-- Área chica -->
         <div style="
-            position: absolute; left: 160px; top: 540px; 
-            width: 80px; height: 60px; 
+            position: absolute; left: 160px; top: 540px;
+            width: 80px; height: 60px;
             border: 2px solid #fff;
         "></div>
 
-        <!-- Punto penal -->
+        <!-- Semicírculo penal -->
         <div style="
-            position: absolute; left: 200px; top: 567px; 
-            width: 5px; height: 5px; 
-            background: #fff; border-radius: 50%;
-            transform: translate(-50%, -50%);
-        "></div>
-
-        <!-- Semicírculo -->
-        <div style="
-            position: absolute; left: 200px; top: 567px;
+            position: absolute; left: 200px; top: 460px;
             width: 120px; height: 120px;
             margin-left: -60px; margin-top: -60px;
             border: 2px solid #fff;
             border-radius: 50%;
             background: none;
-            clip-path: inset(60px 0 0 0);
+            clip-path: inset(0 0 60px 0);
         "></div>
 
         {html_fwd}
@@ -204,6 +181,9 @@ with col_field:
 
     components.html(field_html, height=field_height + 20)
 
+# ---------------------------
+# Lista de suplentes (con DT)
+# ---------------------------
 with col_lista:
     st.header("Suplentes")
     supl_html = "<div style='background-color: #333; color: #fff; padding: 10px; border-radius: 5px;'>"
@@ -224,5 +204,5 @@ with col_lista:
     else:
         supl_html += "<strong>Delanteros:</strong> <em>Ninguno</em><br>"
 
-    supl_html += "</div>"
+    supl_html += f"<br><strong>DT:</strong> {dt}</div>"
     st.markdown(supl_html, unsafe_allow_html=True)
