@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
-st.write("### Versión Final - Opción 2 + Área Penal Vertical Reducida")
+st.write("### Versión Final - Opción 3: Corrección de Colores por Rol")
 
 # ------------------------------------------------
 # 1) Datos de jugadores
@@ -15,28 +15,13 @@ all_players = {
     "DT": ["Diego"],
 }
 
-# Paleta de colores según opción 2:
-# Arquero: azul brillante, Defensas: rojo fuerte, Mediocampistas: verde, Delanteros: ámbar
+# Colores según la opción 3:
 category_colors = {
-    "A": "#007bff",  # Azul brillante
-    "D": "#dc3545",  # Rojo fuerte
-    "M": "#28a745",  # Verde
-    "F": "#ffc107",  # Ámbar
+    "A": "#6f42c1",  # Púrpura para arquero
+    "D": "#e83e8c",  # Rosa fuerte para defensores
+    "M": "#fd7e14",  # Naranja para mediocampistas
+    "F": "#20c997",  # Verde azulado para delanteros
 }
-
-def get_player_category(player):
-    """Devuelve la categoría (A, D, M, F) a la que pertenece un jugador."""
-    for cat in ["A", "D", "M", "F"]:
-        if player in all_players[cat]:
-            return cat
-    return None
-
-def get_player_color(player):
-    """Devuelve el color según la posición del jugador."""
-    cat = get_player_category(player)
-    if cat and cat in category_colors:
-        return category_colors[cat]
-    return "#ffffff"  # blanco si no encuentra la categoría
 
 # ------------------------------------------------
 # 2) Configuración de la formación
@@ -71,6 +56,7 @@ st.markdown(f"**Formación elegida:** `{formation_str}`")
 st.markdown("---")
 st.header("Asignación de Jugadores en la Cancha")
 
+# Seleccionamos el arquero
 arquero = st.selectbox("Elegí el arquero", all_players["A"])
 
 def select_players(cat_key, num, key_prefix, label, exclude=[]):
@@ -79,12 +65,15 @@ def select_players(cat_key, num, key_prefix, label, exclude=[]):
         st.subheader(f"{label} (en cancha)")
         cols = st.columns(num)
         for i in range(num):
-            available = ["(Ninguno)"] + [p for p in all_players[cat_key] if p not in choices and p not in exclude]
+            available = ["(Ninguno)"] + [
+                p for p in all_players[cat_key] if p not in choices and p not in exclude
+            ]
             with cols[i]:
                 sel = st.selectbox(f"{label} {i+1}", available, key=f"{key_prefix}_{i}")
             choices.append(sel)
     return choices
 
+# Excluimos el arquero de las otras líneas
 exclude_list = [arquero]
 defender_choices = select_players("D", num_def, "def", "Defensores", exclude=exclude_list)
 mid_choices = select_players("M", num_mid, "mid", "Mediocampistas", exclude=exclude_list)
@@ -115,18 +104,17 @@ else:
 # ------------------------------------------------
 # 5) Construcción del canvas con cancha y suplentes integrados
 # ------------------------------------------------
-def get_player_html(player, top_pct, left_pct):
-    """Devuelve el HTML de un jugador con círculos triple borde según posición."""
+# Actualizamos la función para que reciba la categoría (rol) del jugador y use el color correspondiente.
+def get_player_html(player, top_pct, left_pct, cat):
     if player == "(Ninguno)":
         return ""
-    circle_color = get_player_color(player)
     return f"""
     <div style="position: absolute; top: {top_pct}%; left: {left_pct}%;
                 transform: translate(-50%, -50%); text-align: center;">
         <div style="
             width: 40px; height: 40px;
             border-radius: 50%;
-            background: {circle_color};
+            background: {category_colors[cat]};
             border: 2px solid #fff;
             box-shadow: 0 0 0 2px #000;
             margin: 0 auto;
@@ -139,30 +127,33 @@ def get_player_html(player, top_pct, left_pct):
 
 def build_players_html(gk, defs, meds, fwds):
     result = ""
-    # Posiciones verticales: Arquero ~90%, Defensas ~70%, Mediocampistas ~50%, Delanteros ~30%
+    # Arquitecto ~90% (categoria "A")
     if gk:
-        result += get_player_html(gk[0], 90, 50)
+        result += get_player_html(gk[0], 90, 50, "A")
+    # Defensas ~70% (categoria "D")
     if defs:
         n = len(defs)
         for i, p in enumerate(defs):
             left_pct = (i + 1) / (n + 1) * 100
-            result += get_player_html(p, 70, left_pct)
+            result += get_player_html(p, 70, left_pct, "D")
+    # Mediocampistas ~50% (categoria "M")
     if meds:
         n = len(meds)
         for i, p in enumerate(meds):
             left_pct = (i + 1) / (n + 1) * 100
-            result += get_player_html(p, 50, left_pct)
+            result += get_player_html(p, 50, left_pct, "M")
+    # Delanteros ~30% (categoria "F")
     if fwds:
         n = len(fwds)
         for i, p in enumerate(fwds):
             left_pct = (i + 1) / (n + 1) * 100
-            result += get_player_html(p, 30, left_pct)
+            result += get_player_html(p, 30, left_pct, "F")
     return result
 
 players_html = build_players_html([arquero], defender_choices, mid_choices, fwd_choices)
 
 # -------------------
-# a) Cancha (lado izquierdo, 400x600) con fondo "stripes"
+# a) Cancha (lado izquierdo, 400x600) con fondo "stripes" y área penal con menor altura
 # -------------------
 field_html = f"""
 <div style="position: absolute; left: 0; top: 0; width: 400px; height: 600px;
