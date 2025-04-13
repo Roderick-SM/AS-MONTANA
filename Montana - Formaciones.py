@@ -1,4 +1,3 @@
-# formation_app.py
 import streamlit as st
 
 # Datos
@@ -23,47 +22,53 @@ formations = {
 st.set_page_config(layout="wide")
 st.title("⚽ Organizador de Formaciones")
 
+# Selección de cantidad y formación
 num_players = st.selectbox("Cantidad de jugadores (sin contar arquero)", list(formations.keys()))
 formation_list = formations[num_players]
-formation = st.selectbox("Formación (Defensa-Medio-Ataque)", formation_list)
+formation = st.selectbox("Formación (Defensa - Medio - Ataque)", formation_list)
 
-# Selección automática
+# Selección automática de jugadores
 outfield = all_players["D"] + all_players["M"] + all_players["F"]
 selected = outfield[:num_players]
 bench = outfield[num_players:num_players + 5]
-reserves = outfield[num_players + 5:]
 
 defenders = selected[:formation[0]]
 midfielders = selected[formation[0]:formation[0]+formation[1]]
 forwards = selected[formation[0]+formation[1]:]
 
-# Mostrar cancha
-st.subheader("📋 Formación en cancha")
-st.markdown("Arquero: **{}**".format(all_players["A"][0]))
+# Layout cancha + banco
+col_cancha, col_banco = st.columns([4, 1])
 
-col1, col2, col3 = st.columns(3)
-col1.markdown("### 🛡️ Defensores")
-for p in defenders:
-    col1.write(p)
+with col_cancha:
+    st.markdown("### 🏟️ Cancha")
+    st.markdown(f"**Formación:** {formation[0]} - {formation[1]} - {formation[2]}")
 
-col2.markdown("### 🎯 Mediocampistas")
-for p in midfielders:
-    col2.write(p)
+    # Delanteros
+    st.markdown("#### 🔥 Delanteros")
+    cols = st.columns(formation[2])
+    for i, p in enumerate(forwards):
+        cols[i].markdown(f"**{p}**")
 
-col3.markdown("### 🔥 Delanteros")
-for p in forwards:
-    col3.write(p)
+    # Mediocampistas
+    st.markdown("#### 🎯 Mediocampistas")
+    cols = st.columns(formation[1])
+    for i, p in enumerate(midfielders):
+        cols[i].markdown(f"**{p}**")
 
-# Mostrar banco
-st.subheader("🪑 Banco de suplentes")
-for p in bench:
-    st.write(p)
+    # Defensores
+    st.markdown("#### 🛡️ Defensores")
+    cols = st.columns(formation[0])
+    for i, p in enumerate(defenders):
+        cols[i].markdown(f"**{p}**")
 
-# Reserva
-st.subheader("📋 Jugadores en reserva")
-for p in reserves:
-    st.write(p)
+    # Arquero
+    st.markdown("#### 🧤 Arquero")
+    st.markdown(f"**{all_players['A'][0]}**")
 
-# DT
-st.subheader("🎩 DT")
-st.write(all_players["DT"][0])
+with col_banco:
+    st.markdown("### 🪑 Suplentes")
+    for p in bench:
+        st.write(p)
+
+    st.markdown("### 🎩 DT")
+    st.write(all_players["DT"][0])
