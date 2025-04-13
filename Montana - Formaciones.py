@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
-st.write("### Versión Final - Opción 3: Colores por Rol y Subdivisión de Mediocampistas")
+st.write("### Versión Final - Opción 3: Colores por Rol y Subdivisión de Mediocampistas y Defensores")
 
 # ------------------------------------------------
 # 1) Datos de jugadores
@@ -19,7 +19,7 @@ all_players = {
 category_colors = {
     "A": "#6f42c1",  # Púrpura para arquero
     "D": "#e83e8c",  # Rosa fuerte para defensores
-    "M": "#fd7e14",  # Naranja para mediocampistas
+    "M": "#fd7e8e",  # Naranja para mediocampistas  
     "F": "#20c997",  # Verde azulado para delanteros
 }
 
@@ -50,7 +50,17 @@ if (num_def + num_mid + num_fwd) != num_field_players:
 formation_str = f"{num_def}-{num_mid}-{num_fwd}"
 st.markdown(f"**Formación elegida:** `{formation_str}`")
 
-# --- Subdivisión de Mediocampistas ---
+# --- SUBDIVISIÓN DE DEFENSORES (antes que mediocampistas) ---
+st.markdown("### Subdivisión de Defensores")
+col_def = st.columns(3)
+num_def_central = col_def[0].number_input("Defensa Central", min_value=0, value=num_def, step=1)
+num_def_izq = col_def[1].number_input("Lateral Izquierdo", min_value=0, value=0, step=1)
+num_def_der = col_def[2].number_input("Lateral Derecho", min_value=0, value=0, step=1)
+if num_def_central + num_def_izq + num_def_der != num_def:
+    st.error("La suma de las subdivisiones de defensores debe ser igual al total de defensores.")
+    st.stop()
+
+# --- SUBDIVISIÓN DE MEDIOCAMPISTAS ---
 st.markdown("### Subdivisión de Mediocampistas")
 col_mid = st.columns(4)
 num_mid_izq = col_mid[0].number_input("Medio Lateral Izquierdo", min_value=0, value=0, step=1)
@@ -61,17 +71,6 @@ if num_mid_izq + num_mid_der + num_mid_def + num_mid_ofen != num_mid:
     st.error("La suma de las subdivisiones de mediocampistas debe ser igual a la cantidad total de mediocampistas.")
     st.stop()
 
-# --- Subdivisión de Defensores ---
-st.markdown("### Subdivisión de Defensores")
-col_def = st.columns(3)
-num_def_central = col_def[0].number_input("Defensa Central", min_value=0, value=num_def, step=1)
-num_def_izq = col_def[1].number_input("Lateral Izquierdo", min_value=0, value=0, step=1)
-num_def_der = col_def[2].number_input("Lateral Derecho", min_value=0, value=0, step=1)
-if num_def_central + num_def_izq + num_def_der != num_def:
-    st.error("La suma de las subdivisiones de defensores debe ser igual al total de defensores.")
-    st.stop()
-
-
 # ------------------------------------------------
 # 3) Selección de jugadores titulares
 # ------------------------------------------------
@@ -81,31 +80,28 @@ st.header("Asignación de Jugadores en la Cancha")
 # Selección del arquero
 arquero = st.selectbox("Elegí el arquero", all_players["A"])
 
-def select_players(cat_key, num, key_prefix, label, exclude=[]):
+def select_players(category, num, key_prefix, label, exclude=[]):
     choices = []
     if num > 0:
         st.subheader(f"{label} (en cancha)")
         cols = st.columns(num)
         for i in range(num):
-            available = ["(Ninguno)"] + [p for p in all_players[cat_key] if p not in choices and p not in exclude]
+            available = ["(Ninguno)"] + [p for p in all_players[category] if p not in choices and p not in exclude]
             with cols[i]:
                 sel = st.selectbox(f"{label} {i+1}", available, key=f"{key_prefix}_{i}")
             choices.append(sel)
     return choices
 
 exclude_list = [arquero]
-
-exclude_list = [arquero]
 def_central_choices = select_players("D", num_def_central, "defcent", "Defensa Central", exclude=exclude_list)
 def_izq_choices    = select_players("D", num_def_izq,    "defizq",  "Lateral Izquierdo", exclude=exclude_list)
 def_der_choices    = select_players("D", num_def_der,    "defder",  "Lateral Derecho", exclude=exclude_list)
-
 
 mid_izq_choices  = select_players("M", num_mid_izq, "midizq", "Medio Lateral Izquierdo", exclude=exclude_list)
 mid_der_choices  = select_players("M", num_mid_der, "midder", "Medio Lateral Derecho", exclude=exclude_list)
 mid_def_choices  = select_players("M", num_mid_def, "middef", "Medio Defensivo", exclude=exclude_list)
 mid_ofen_choices = select_players("M", num_mid_ofen, "midofen", "Medio Ofensivo", exclude=exclude_list)
-fwd_choices = select_players("F", num_fwd, "fwd", "Delanteros", exclude=exclude_list)
+fwd_choices      = select_players("F", num_fwd,     "fwd",    "Delanteros", exclude=exclude_list)
 
 # ------------------------------------------------
 # 4) Suplentes y Reservas
@@ -113,11 +109,16 @@ fwd_choices = select_players("F", num_fwd, "fwd", "Delanteros", exclude=exclude_
 st.markdown("---")
 st.header("Suplentes y Reservas")
 
-suplentes_def = st.multiselect("Suplentes - Defensa:", options=[p for p in all_players["D"] if p not in defender_choices and p != arquero])
-suplentes_mid = st.multiselect("Suplentes - Medio:", options=[p for p in all_players["M"] if p not in (mid_izq_choices + mid_der_choices + mid_def_choices + mid_ofen_choices) and p != arquero])
-suplentes_fwd = st.multiselect("Suplentes - Delanteros:", options=[p for p in all_players["F"] if p not in fwd_choices and p != arquero])
+suplentes_def = st.multiselect("Suplentes - Defensa:", 
+    options=[p for p in all_players["D"] if p not in (def_central_choices + def_izq_choices + def_der_choices) and p != arquero])
+suplentes_mid = st.multiselect("Suplentes - Medio:", 
+    options=[p for p in all_players["M"] if p not in (mid_izq_choices + mid_der_choices + mid_def_choices + mid_ofen_choices) and p != arquero])
+suplentes_fwd = st.multiselect("Suplentes - Delanteros:", 
+    options=[p for p in all_players["F"] if p not in fwd_choices and p != arquero])
 
-used = set(defender_choices + mid_izq_choices + mid_der_choices + mid_def_choices + mid_ofen_choices + fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd + [arquero])
+used = set(def_central_choices + def_izq_choices + def_der_choices + 
+           mid_izq_choices + mid_der_choices + mid_def_choices + mid_ofen_choices +
+           fwd_choices + suplentes_def + suplentes_mid + suplentes_fwd + [arquero])
 all_outfield = set(all_players["D"] + all_players["M"] + all_players["F"])
 reservas = sorted(list(all_outfield - used))
 
@@ -153,6 +154,7 @@ def get_player_html(player, top_pct, left_pct, cat):
     </div>
     """
 
+# Función para construir HTML de los defensores subdivididos
 def build_defenders_html(def_central, def_izq, def_der):
     result = ""
     if def_central:
@@ -172,7 +174,6 @@ def build_defenders_html(def_central, def_izq, def_der):
             result += get_player_html(p, 70, left_pct, "D")
     return result
 
-
 # Función para construir HTML de un subgrupo de mediocampistas
 def build_subgroup_html(players, top_pct, center_x):
     html = ""
@@ -185,13 +186,13 @@ def build_subgroup_html(players, top_pct, center_x):
     return html
 
 # Función para construir todo el HTML de jugadores en cancha
-def build_players_html(gk, def_central, def_izq, def_der, mid_izq, mid_der, mid_def, mid_ofen, fwds):
+def build_players_html(gk, def_cent, def_izq, def_der, mid_izq, mid_der, mid_def, mid_ofen, fwds):
     result = ""
     # Arquero ~90% (categoria "A")
     if gk:
         result += get_player_html(gk[0], 90, 50, "A")
     # Defensores subdivididos:
-    result += build_defenders_html(def_central, def_izq, def_der)
+    result += build_defenders_html(def_cent, def_izq, def_der)
     # Mediocampistas subdivididos:
     result += build_subgroup_html(mid_izq, 50, 25)
     result += build_subgroup_html(mid_der, 50, 75)
@@ -205,7 +206,6 @@ def build_players_html(gk, def_central, def_izq, def_der, mid_izq, mid_der, mid_
             result += get_player_html(p, 25, left_pct, "F")
     return result
 
-
 players_html = build_players_html(
     [arquero],
     def_central_choices,
@@ -217,6 +217,7 @@ players_html = build_players_html(
     mid_ofen_choices,
     fwd_choices
 )
+
 # -------------------
 # a) Cancha (lado izquierdo, 400x600) con fondo "stripes" y área penal con menor altura
 # -------------------
@@ -276,7 +277,7 @@ field_html = f"""
 
 # -------------------
 # b) Panel de suplentes (lado derecho, 150x600, con fondo gris)
-# Orden: Delanteros, Medio, Defensa; DT más abajo.
+# Orden: Delanteros, Medio, Defensa; DT más abajo, y se muestra formación final.
 # -------------------
 suplentes_html = "<div style='position: absolute; right: 0; top: 0; width: 150px; height: 600px; background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
 suplentes_html += "<div style='text-align: center; font-weight: bold; margin-bottom: 20px;'>Suplentes</div>"
@@ -297,9 +298,7 @@ else:
     suplentes_html += "<div style='margin-bottom: 15px;'><strong>Defensa:</strong> Ninguno</div>"
 
 suplentes_html += "<div style='margin-top: 20px; text-align: center;'><strong>DT:</strong> " + all_players['DT'][0] + "</div>"
-
 suplentes_html += "<div style='margin-top: 20px; text-align: center; font-size: 22px; font-weight: bold;'><strong>Formacion:</strong> <span style='font-size: 22px; font-weight: bold;'>" + formation_str + "</span></div>"
-
 suplentes_html += "</div>"
 
 # -------------------
