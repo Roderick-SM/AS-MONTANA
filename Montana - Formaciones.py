@@ -1,6 +1,9 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
+st.write("### Versión 2.2 - Actualizada")
+
+
 # --------------------------
 # 1. DATOS DE JUGADORES
 # --------------------------
