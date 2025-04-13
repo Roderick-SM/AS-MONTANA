@@ -71,12 +71,6 @@ if num_mid_izq + num_mid_der + num_mid_def + num_mid_ofen != num_mid:
     st.error("La suma de las subdivisiones de mediocampistas debe ser igual a la cantidad total de mediocampistas.")
     st.stop()
 
-# Agregamos una opción de escala para ajustar el tamaño (para pruebas en celular)
-scale = st.slider("Escala de visualización", min_value=0.1, max_value=2.0, value=1.0, step=0.1)
-field_width = int(400 * scale)
-field_height = int(600 * scale)
-suplentes_width = int(150 * scale)
-overall_width = field_width + suplentes_width
 
 # ------------------------------------------------
 # 3) Selección de jugadores titulares
