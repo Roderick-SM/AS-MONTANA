@@ -162,14 +162,14 @@ def build_players_html(gk, defs, mid_izq, mid_der, mid_def, mid_ofen, fwds):
     # Mediocampistas subdivididos:
     result += build_subgroup_html(mid_izq, 50, 25)
     result += build_subgroup_html(mid_der, 50, 75)
-    result += build_subgroup_html(mid_def, 55, 50)
-    result += build_subgroup_html(mid_ofen, 45, 50)
+    result += build_subgroup_html(mid_def, 60, 50)
+    result += build_subgroup_html(mid_ofen, 40, 50)
     # Delanteros ~30% (categoria "F")
     if fwds:
         n = len(fwds)
         for i, p in enumerate(fwds):
             left_pct = (i + 1) / (n + 1) * 100
-            result += get_player_html(p, 30, left_pct, "F")
+            result += get_player_html(p, 25, left_pct, "F")
     return result
 
 players_html = build_players_html([arquero], defender_choices, mid_izq_choices, mid_der_choices, mid_def_choices, mid_ofen_choices, fwd_choices)
