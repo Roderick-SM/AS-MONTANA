@@ -143,7 +143,7 @@ with col_field:
 
         <!-- Semicírculo central inferior (CORREGIDO) -->
         <div style="
-            position: absolute; top: 50px; left: 200px;
+            position: absolute; top: -50px; left: 200px;
             width: 120px; height: 120px;
             margin-left: -60px;
             border: 2px solid #fff;
