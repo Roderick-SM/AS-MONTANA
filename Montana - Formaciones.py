@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# --- Datos de jugadores ---
+# --- DATOS DE JUGADORES ---
 all_players = {
     "A": ["Axel"],  # Arquero
     "D": ["David", "Manu", "Joaco", "Sebastian", "Ale", "Gaston", "Marius", "Rodri A"],
@@ -10,22 +10,19 @@ all_players = {
     "DT": ["Diego"],
 }
 
-# Configurar la página
 st.set_page_config(layout="wide")
-st.title("⚽ Organizador de Formaciones - Vista Cancha con Fondo Mejorado")
+st.title("⚽ Organizador de Formaciones - Cancha Verde + Suplentes + DT")
 
-# -------------------------------
-# 1. CONFIGURACIÓN DE LA FORMACIÓN
-# -------------------------------
+# -------------------------------------------------
+# 1) CONFIGURACIÓN DE LA FORMACIÓN
+# -------------------------------------------------
 st.header("Configuración de la Formación")
 
-# Elegir número total de jugadores de campo (excluyendo arquero)
 num_players = st.number_input(
     "Número de jugadores de campo (excluyendo arquero)",
     min_value=0, max_value=10, value=5, step=1
 )
 
-st.markdown("### Distribución de Jugadores en la Cancha")
 col_dist = st.columns(3)
 with col_dist[0]:
     num_def = st.number_input("Defensas", min_value=0, max_value=num_players, value=2, step=1)
@@ -34,23 +31,22 @@ with col_dist[1]:
 with col_dist[2]:
     num_fwd = st.number_input("Delanteros", min_value=0, max_value=num_players, value=1, step=1)
 
-# Validar que la suma de posiciones coincida con el total
 if (num_def + num_mid + num_fwd) != num_players:
-    st.error("La suma de Defensas, Mediocampistas y Delanteros debe ser igual a " + str(num_players))
+    st.error(f"La suma (D+M+F) debe ser igual a {num_players}. Corrígelo antes de continuar.")
     st.stop()
 
-# -------------------------------
-# 2. ASIGNACIÓN MANUAL DE JUGADORES
-# -------------------------------
+# -------------------------------------------------
+# 2) ASIGNACIÓN MANUAL DE JUGADORES
+# -------------------------------------------------
 st.markdown("---")
 st.header("Asignación de Jugadores por Posición")
-st.markdown("Selecciona el jugador para cada puesto. Si no asignás alguno, aparecerá como '(Ninguno)'.")
+st.markdown("Selecciona el jugador para cada puesto. Si no asignás alguno, aparecerá '(Ninguno)'.")
 
 defender_choices = []
 mid_choices = []
 fwd_choices = []
 
-# Asignar Defensas
+# Defensas
 if num_def > 0:
     st.subheader("Defensas")
     cols_def = st.columns(num_def)
@@ -63,7 +59,7 @@ if num_def > 0:
             )
             defender_choices.append(choice)
 
-# Asignar Mediocampistas
+# Mediocampistas
 if num_mid > 0:
     st.subheader("Mediocampistas")
     cols_mid = st.columns(num_mid)
@@ -76,7 +72,7 @@ if num_mid > 0:
             )
             mid_choices.append(choice)
 
-# Asignar Delanteros
+# Delanteros
 if num_fwd > 0:
     st.subheader("Delanteros")
     cols_fwd = st.columns(num_fwd)
@@ -89,77 +85,122 @@ if num_fwd > 0:
             )
             fwd_choices.append(choice)
 
-# Mostrar Arquero y DT fijos
+# Arquero y DT (fijos)
 st.markdown("#### Arquero")
 arquero = all_players["A"][0]
-st.markdown(f"**{arquero}**")
+st.write(f"**{arquero}**")
 
 st.markdown("#### DT")
 dt = all_players["DT"][0]
-st.markdown(f"**{dt}**")
+st.write(f"**{dt}**")
 
-# -------------------------------
-# 3. VISUALIZACIÓN EN LA CANCHA
-# -------------------------------
+# -------------------------------------------------
+# 3) VISUALIZACIÓN EN LA CANCHA (columna izquierda)
+#    + SUPLENTES Y DT EN LA DERECHA
+# -------------------------------------------------
 st.markdown("---")
-st.header("Visualización en la Cancha")
+st.header("Vista en Cancha + Suplentes")
 
-def get_row_html(players, top):
-    """
-    Genera HTML para una fila de jugadores en la cancha.
-    :param players: Lista de nombres (se ignoran "(Ninguno)")
-    :param top: Posición vertical en porcentaje (0 a 100)
-    :return: HTML con divs posicionados absolutamente.
-    """
-    html = ""
-    if players:
-        N = len(players)
-        for i, player in enumerate(players):
-            left = (i + 1) / (N + 1) * 100  # Espaciado horizontal en porcentaje
-            if player != "(Ninguno)":
+# Creamos dos columnas: cancha (3 partes) y banco (1 parte)
+col_cancha, col_banco = st.columns([3, 1])
+
+#
+# A) CANCHA
+#
+with col_cancha:
+    def get_row_html(players, top):
+        """
+        Genera HTML para una fila de jugadores en la cancha.
+        :param players: Lista de nombres (ignoramos "(Ninguno)")
+        :param top: Posición vertical en porcentaje (0 a 100)
+        :return: HTML con divs posicionados absolutamente.
+        """
+        html = ""
+        if players:
+            valid_players = [p for p in players if p != "(Ninguno)"]
+            N = len(valid_players)
+            for i, player in enumerate(valid_players):
+                # Distribuimos horizontalmente en porcentaje
+                left = (i + 1) / (N + 1) * 100  
                 html += f'''
                 <div style="position: absolute; top: {top}%; left: {left}%;
                             transform: translate(-50%, -50%); text-align: center;">
-                    <div style="font-size: 24px;">●</div>
-                    <div style="font-size: 14px;">{player}</div>
+                    <div style="font-size: 36px; line-height: 32px;">●</div>
+                    <div style="font-size: 20px; font-weight: bold;">{player}</div>
                 </div>
                 '''
-    return html
+        return html
 
-# Definir posiciones verticales (porcentaje de altura)
-top_forwards   = 30   # Delanteros
-top_midfield   = 50   # Mediocampistas
-top_defense    = 70   # Defensas
-top_goalkeeper = 90   # Arquero
+    # Ajustamos porcentajes de cada línea
+    top_forwards   = 25   # Delanteros
+    top_midfield   = 50   # Mediocampistas
+    top_defense    = 75   # Defensas
+    top_goalkeeper = 90   # Arquero
 
-# Generar HTML para cada línea
-html_forwards = get_row_html(fwd_choices, top_forwards)
-html_midfield = get_row_html(mid_choices, top_midfield)
-html_defense  = get_row_html(defender_choices, top_defense)
-html_goalkeeper = f'''
-<div style="position: absolute; top: {top_goalkeeper}%; left: 50%;
-            transform: translate(-50%, -50%); text-align: center;">
-    <div style="font-size: 24px;">●</div>
-    <div style="font-size: 14px;">{arquero}</div>
-</div>
-'''
+    # Generamos HTML para cada línea
+    html_forwards = get_row_html(fwd_choices, top_forwards)
+    html_midfield = get_row_html(mid_choices, top_midfield)
+    html_defense  = get_row_html(defender_choices, top_defense)
+    html_goalkeeper = f"""
+    <div style="position: absolute; top: {top_goalkeeper}%; left: 50%;
+                transform: translate(-50%, -50%); text-align: center;">
+        <div style="font-size: 36px; line-height: 32px;">●</div>
+        <div style="font-size: 20px; font-weight: bold;">{arquero}</div>
+    </div>
+    """
 
-# Configuración de la cancha
-field_width = 800
-field_height = 600
-# Imagen de un terreno de fútbol (fondo)
-field_bg = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Football_pitch.svg/800px-Football_pitch.svg.png"
+    # Imagen de la cancha verde con líneas
+    field_width = 800
+    field_height = 550
+    field_bg = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Football_pitch.svg/1200px-Football_pitch.svg.png"
 
-# Combinar todo en un contenedor con fondo de cancha
-html_field = f'''
-<div style="position: relative; width: {field_width}px; height: {field_height}px;
-            background-image: url('{field_bg}'); background-size: cover; border: 2px solid #000;">
-    {html_forwards}
-    {html_midfield}
-    {html_defense}
-    {html_goalkeeper}
-</div>
-'''
+    # Contenedor HTML con la cancha de fondo
+    html_field = f"""
+    <div style="position: relative; width: {field_width}px; height: {field_height}px;
+                background: url('{field_bg}') no-repeat center/cover;
+                border: 2px solid #000; margin-bottom: 20px;">
+        {html_forwards}
+        {html_midfield}
+        {html_defense}
+        {html_goalkeeper}
+    </div>
+    """
 
-# Renderizar el HTML usando components.html para asegurarnos que se interprete y no se muestre el código crudo.
-components.html(html_field, height=field_height + 20)
+    # Renderizamos el HTML
+    components.html(html_field, height=field_height + 40)
+
+#
+# B) BANCO DE SUPLENTES + DT
+#
+with col_banco:
+    st.subheader("Suplentes")
+
+    # Para listar suplentes, calculamos quién NO fue elegido en cada posición
+    chosen_defenders = [p for p in defender_choices if p != "(Ninguno)"]
+    chosen_mids      = [p for p in mid_choices if p != "(Ninguno)"]
+    chosen_forwards  = [p for p in fwd_choices if p != "(Ninguno)"]
+
+    bench_def = sorted(set(all_players["D"]) - set(chosen_defenders))
+    bench_mid = sorted(set(all_players["M"]) - set(chosen_mids))
+    bench_fwd = sorted(set(all_players["F"]) - set(chosen_forwards))
+
+    # Mostramos suplentes por posición (solo si hay alguno)
+    if bench_def:
+        st.markdown("**Defensas**")
+        for p in bench_def:
+            st.write(p)
+
+    if bench_mid:
+        st.markdown("**Mediocampistas**")
+        for p in bench_mid:
+            st.write(p)
+
+    if bench_fwd:
+        st.markdown("**Delanteros**")
+        for p in bench_fwd:
+            st.write(p)
+
+    # Al final, DT
+    st.markdown("---")
+    st.subheader("DT")
+    st.write(dt)
