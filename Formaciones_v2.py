@@ -70,7 +70,7 @@ if num_mid_izq + num_mid_der + num_mid_def + num_mid_ofen != num_mid:
     st.error("La suma de las subdivisiones de mediocampistas debe ser igual a la cantidad total de mediocampistas.")
     st.stop()
 
-# Fijamos la escala a 1 (sin slider)
+# Scale is fixed at 1
 scale = 1.0
 field_width = int(400 * scale)
 field_height = int(600 * scale)
@@ -110,7 +110,7 @@ mid_ofen_choices = select_players("M", num_mid_ofen, "midofen", "Medio Ofensivo"
 fwd_choices      = select_players("F", num_fwd,     "fwd",    "Delanteros", exclude=exclude_list)
 
 # ------------------------------------------------
-# 4) Suplentes y Reservas (reservas eliminadas)
+# 4) Suplentes y Reservas (reservas eliminated)
 # ------------------------------------------------
 st.markdown("---")
 st.header("Suplentes y Reservas")
@@ -125,7 +125,7 @@ suplentes_fwd = st.multiselect("Suplentes - Delanteros:",
 # ------------------------------------------------
 # 5) Construcción del canvas con cancha y suplentes integrados
 # ------------------------------------------------
-# Función para generar HTML de un jugador
+# Function to generate HTML for a player
 def get_player_html(player, top_pct, left_pct, cat):
     if player == "(Ninguno)":
         return ""
@@ -146,7 +146,7 @@ def get_player_html(player, top_pct, left_pct, cat):
     </div>
     """
 
-# Función para construir HTML de los defensores subdivididos
+# Function to build HTML for subdivided defenders
 def build_defenders_html(def_central, def_izq, def_der):
     result = ""
     if def_central:
@@ -166,31 +166,31 @@ def build_defenders_html(def_central, def_izq, def_der):
             result += get_player_html(p, 70, left_pct, "D")
     return result
 
-# Función para construir HTML de un subgrupo de mediocampistas
+# Function to build HTML for a subgroup of midfielders
 def build_subgroup_html(players, top_pct, center_x):
     html = ""
     if players:
         n = len(players)
         for i, player in enumerate(players):
-            delta = (i - (n - 1) / 2) * 10  # Desplazamiento horizontal
+            delta = (i - (n - 1) / 2) * 10  # Horizontal displacement
             left_pct = center_x + delta
             html += get_player_html(player, top_pct, left_pct, "M")
     return html
 
-# Función para construir todo el HTML de jugadores en cancha
+# Function to build the complete HTML for players on the field
 def build_players_html(gk, def_cent, def_izq, def_der, mid_izq, mid_der, mid_def, mid_ofen, fwds):
     result = ""
-    # Arquero ~90% (categoria "A")
+    # Goalkeeper ~90% (category "A")
     if gk:
         result += get_player_html(gk[0], 90, field_width//2, "A")
-    # Defensores subdivididos:
+    # Defenders subdivided:
     result += build_defenders_html(def_cent, def_izq, def_der)
-    # Mediocampistas subdivididos:
+    # Midfielders subdivided:
     result += build_subgroup_html(mid_izq, 50, 25)
     result += build_subgroup_html(mid_der, 50, 75)
     result += build_subgroup_html(mid_def, 60, 50)
     result += build_subgroup_html(mid_ofen, 40, 50)
-    # Delanteros ~25% (categoria "F")
+    # Forwards ~25% (category "F")
     if fwds:
         n = len(fwds)
         for i, p in enumerate(fwds):
@@ -211,7 +211,7 @@ players_html = build_players_html(
 )
 
 # -------------------
-# a) Cancha (lado izquierdo, escala aplicada)
+# a) Field (left side, with fixed scale)
 # -------------------
 field_html = f"""
 <div id="overall_container" style="position: absolute; left: 0; top: 0; width: {field_width}px; height: {field_height}px;
@@ -224,16 +224,16 @@ field_html = f"""
             );
             border-right: 2px solid #000; box-sizing: border-box;">
     
-    <!-- Línea de medio campo -->
+    <!-- Midline -->
     <div style="position: absolute; top: 0px; left: 0; width: 100%; height: 2px; background: white;"></div>
     
-    <!-- Punto central -->
+    <!-- Center point -->
     <div style="position: absolute; top: 0px; left: {field_width//2}px;
                 width: 6px; height: 6px;
                 background: white; border-radius: 50%;
                 transform: translate(-50%, 50%);"></div>
     
-    <!-- Semicírculo central inferior -->
+    <!-- Bottom semicircle -->
     <div style="
         position: absolute; top: -{int(60*scale)}px; left: {field_width//2}px;
         width: {int(120*scale)}px; height: {int(120*scale)}px;
@@ -243,19 +243,19 @@ field_html = f"""
         clip-path: inset({int(60*scale)}px 0 0 0);
     "></div>
     
-    <!-- Línea de gol -->
+    <!-- Goal line -->
     <div style="position: absolute; top: {field_height-2}px; left: 0; width: 100%; height: 2px; background: white;"></div>
     
-    <!-- Arco -->
+    <!-- Goal -->
     <div style="position: absolute; left: {int(160*scale)}px; top: {field_height-2}px; width: {int(80*scale)}px; height: {int(8*scale)}px; border: 2px solid white;"></div>
     
-    <!-- Área penal (más larga, con menor altura) -->
+    <!-- Penalty area -->
     <div style="position: absolute; left: {int(60*scale)}px; top: {int(500*scale)}px; width: {int(280*scale)}px; height: {int(120*scale)}px; border: 2px solid white;"></div>
     
-    <!-- Área chica -->
+    <!-- Small area -->
     <div style="position: absolute; left: {int(160*scale)}px; top: {int(580*scale)}px; width: {int(80*scale)}px; height: {int(60*scale)}px; border: 2px solid white;"></div>
     
-    <!-- Semicírculo frente al área -->
+    <!-- Front semicircle -->
     <div style="position: absolute; top: {int(500*scale)}px; left: {field_width//2}px;
                 width: {int(120*scale)}px; height: {int(120*scale)}px;
                 margin-left: -{int(60*scale)}px; margin-top: -{int(60*scale)}px;
@@ -269,8 +269,7 @@ field_html = f"""
 """
 
 # -------------------
-# b) Panel de suplentes (lado derecho, con escala aplicada y sin reservas)
-# Orden: Delanteros, Medio, Defensa; DT y formación final.
+# b) Suplentes panel (right side, fixed scale)
 # -------------------
 suplentes_html = f"<div style='position: absolute; right: 0; top: 0; width: {suplentes_width}px; height: {field_height}px; background: #999; color: #fff; padding: 10px; box-sizing: border-box; font-size: 18px;'>"
 suplentes_html += "<div style='text-align: center; font-weight: bold; margin-bottom: 20px;'>Suplentes</div>"
@@ -295,12 +294,12 @@ suplentes_html += "<div style='margin-top: 20px; text-align: center; font-size: 
 suplentes_html += "</div>"
 
 # -------------------
-# c) Contenedor global (ajustado a pantalla: width 100% con max-width)
+# c) Global container (100% width with max-width)
 # -------------------
-overall_html = f"""
-<div id="overall_container" style="position: relative; width: 100%; max-width: {overall_width}px; height: {field_height}px; border: 2px solid #000; margin: auto; margin-bottom: 20px;">
-    {field_html}
-    {suplentes_html}
+overall_html = r"""
+<div id="overall_container" style="position: relative; width: 100%; max-width: """ + f"{overall_width}px; height: {field_height}px; border: 2px solid #000; margin: auto; margin-bottom: 20px;">" + r"""
+    """ + field_html + r"""
+    """ + suplentes_html + r"""
 </div>
 <div style="text-align: center; margin-bottom: 20px;">
   <button onclick="downloadImage()" style="padding: 10px; font-size: 16px;">Descargar Imagen</button>
